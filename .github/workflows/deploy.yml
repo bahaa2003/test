@@ -1,0 +1,61 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event.workflow_run.conclusion == 'success'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm run test
+      env:
+        NODE_ENV: test
+        MONGODB_URI: mongodb://localhost:27017/attendance-system-test
+        JWT_SECRET: test-jwt-secret
+        REFRESH_TOKEN_SECRET: test-refresh-token-secret
+
+    - name: Build application
+      run: npm run build
+
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd /var/www/attendance-system
+          git pull origin main
+          npm ci --only=production
+          pm2 reload ecosystem.config.js --env production
+          echo "Deployment completed successfully"
+
+    - name: Notify deployment status
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

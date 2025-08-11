@@ -1,0 +1,149 @@
+attendance-system-nfc/
+│
+├── config/                  # إعدادات التطبيق
+│   ├── db.js                # اتصالات قاعدة البيانات
+│   ├── nfc.js               # تهيئة أجهزة NFC
+│   ├── swagger.js           # إعدادات وثائق API
+│   └── config.js            # إعدادات عامة
+│
+├── controllers/             # معالجة طلبات HTTP
+│   ├── admin/               # لوحة التحكم الإدارية
+│   │   ├── collegeController.js
+│   │   ├── departmentController.js
+│   │   └── userManagementController.js
+│   │
+│   ├── faculty/             # واجهة المدرسين
+│   │   ├── attendanceController.js
+│   │   ├── scheduleController.js
+│   │   └── reportController.js
+│   │
+│   ├── student/             # واجهة الطلاب
+│   │   ├── attendanceController.js
+│   │   └── profileController.js
+│   │
+│   └── shared/              # خدمات مشتركة
+│       ├── authController.js
+│       ├── importController.js
+│       └── exportController.js
+│
+├── models/                  # نماذج بيانات MongoDB
+│   ├── academic/            # الهيكل الأكاديمي
+│   │   ├── College.js
+│   │   ├── Department.js
+│   │   ├── Program.js       # البرامج الدراسية
+│   │   └── AcademicYear.js
+│   │
+│   ├── user/                # مستخدمون النظام
+│   │   ├── Admin.js
+│   │   ├── Faculty.js
+│   │   └── Student.js
+│   │
+│   └── operational/         # العمليات اليومية
+│       ├── Attendance.js
+│       ├── Schedule.js
+│       ├── Subject.js
+│       └── NfcDevice.js
+│
+├── repositories/            # طبقة الوصول للبيانات
+│   ├── academic/
+│   │   ├── collegeRepository.js
+│   │   └── departmentRepository.js
+│   │
+│   ├── user/
+│   │   ├── studentRepository.js
+│   │   └── facultyRepository.js
+│   │
+│   └── operational/
+│       ├── attendanceRepository.js
+│       └── nfcRepository.js
+│
+├── routes/                  # توجيهات API
+│   ├── admin/
+│   │   ├── collegeRoutes.js
+│   │   └── departmentRoutes.js
+│   │
+│   ├── faculty/
+│   │   ├── attendanceRoutes.js
+│   │   └── scheduleRoutes.js
+│   │
+│   ├── student/
+│   │   └── attendanceRoutes.js
+│   │
+│   └── index.js             # تجميع كل الروتات
+│
+├── services/                # المنطق العملي
+│   ├── attendance/
+│   │   ├── NfcService.js    # معالجة NFC
+│   │   ├── ManualService.js # التسجيل اليدوي
+│   │   └── Validator.js     # التحقق من البيانات
+│   │
+│   ├── notification/
+│   │   ├── EmailService.js
+│   │   ├── SmsService.js
+│   │   └── PushService.js
+│   │
+│   └── data/
+│       ├── ImportService.js
+│       └── ExportService.js
+│
+├── middlewares/             # معالجات الطلبات
+│   ├── auth/
+│   │   ├── authenticate.js  # المصادقة
+│   │   ├── authorize.js     # الصلاحيات
+│   │   └── roleCheck.js
+│   │
+│   ├── validators/          # التحقق من المدخلات
+│   │   ├── attendanceValidator.js
+│   │   └── userValidator.js
+│   │
+│   └── nfc/                 # معالجات NFC
+│       ├── deviceAuth.js
+│       └── dataParser.js
+│
+├── utils/                   # أدوات مساعدة
+│   ├── api/
+│   │   ├── ApiFeatures.js   # تصفية البيانات
+│   │   └── ApiResponse.js   # توحيد الاستجابات
+│   │
+│   ├── helpers/
+│   │   ├── dateUtils.js     # معالجة التواريخ
+│   │   └── nfcUtils.js      # تحويل بيانات NFC
+│   │
+│   ├── constants.js         # ثوابت التطبيق
+│   └── logger.js            # تسجيل الأحداث
+│
+├── tests/                   # الاختبارات
+│   ├── unit/                # اختبارات الوحدات
+│   │   ├── services/
+│   │   └── repositories/
+│   │
+│   └── integration/         # اختبارات التكامل
+│       ├── api/
+│       └── nfc/
+│
+├── docs/                    # الوثائق
+│   ├── api/                 # وثائق Swagger/OpenAPI
+│   │   ├── swagger.yaml
+│   │   └── schemas/
+│   │
+│   ├── db/                  # تصميم قاعدة البيانات
+│   │   ├── ERD.md
+│   │   └── migrations/
+│   │
+│   └── guides/              # إرشادات الاستخدام
+│       ├── admin-guide.md
+│       └── developer-guide.md
+│
+├── scripts/                 # سكربتات مساعدة
+│   ├── dataImporter/        # استيراد البيانات
+│   │   ├── colleges/
+│   │   └── students/
+│   │
+│   └── maintenance/         # صيانة النظام
+│       ├── backupDb.js
+│       └── cleanup.js
+│
+├── .env                     # متغيرات البيئة
+├── .env.example             # نموذج للمتغيرات
+├── app.js                   # تهيئة التطبيق
+└── server.js                # تشغيل الخادم
