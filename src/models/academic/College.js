@@ -1,102 +1,113 @@
 import mongoose from 'mongoose';
 
-const collegeSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'اسم الكلية مطلوب'],
-    unique: true,
-    trim: true,
-    maxlength: [100, 'لا يمكن أن يتجاوز الاسم 100 حرف']
-  },
-  code: {
-    type: String,
-    required: [true, 'كود الكلية مطلوب'],
-    unique: true,
-    uppercase: true,
-    validate: {
-      validator: function(v) {
-        return /^[A-Z]{3,5}$/.test(v);
-      },
-      message: 'كود الكلية يجب أن يكون 3-5 أحرف لاتينية كبيرة'
-    }
-  },
-  establishedYear: {
-    type: Number,
-    required: true,
-    min: [1900, 'سنة التأسيس يجب أن تكون بعد 1900'],
-    max: [new Date().getFullYear(), 'سنة التأسيس لا يمكن أن تكون في المستقبل']
-  },
-  dean: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Faculty',
-    required: true,
-    validate: {
-      validator: async function(v) {
-        const faculty = await mongoose.model('Faculty').findById(v);
-        return faculty && faculty.designation === 'professor';
-      },
-      message: 'عميد الكلية يجب أن يكون بروفيسور'
-    }
-  },
-  viceDeans: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Faculty'
-  }],
-  location: {
-    building: String,
-    floor: Number,
-    coordinates: {
-      lat: Number,
-      lng: Number
-    }
-  },
-  contact: {
-    phone: {
+const collegeSchema = new mongoose.Schema(
+  {
+    name: {
       type: String,
+      required: [true, 'اسم الكلية مطلوب'],
+      trim: true,
+      maxlength: [100, 'لا يمكن أن يتجاوز الاسم 100 حرف']
+    },
+    code: {
+      type: String,
+      required: [true, 'كود الكلية مطلوب'],
+      uppercase: true,
       validate: {
-        validator: function(v) {
-          return /^01[0-9]{9}$/.test(v);
+        validator: function (v) {
+          return (/^[A-Z]{3,5}$/).test(v);
         },
-        message: 'رقم الهاتف غير صالح'
+        message: 'كود الكلية يجب أن يكون 3-5 أحرف لاتينية كبيرة'
       }
     },
-    email: {
-      type: String,
-      lowercase: true,
+    // Multi-tenant field
+    university: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'University',
+      required: [true, 'يجب تحديد الجامعة']
+    },
+    establishedYear: {
+      type: Number,
+      required: true,
+      min: [1900, 'سنة التأسيس يجب أن تكون بعد 1900'],
+      max: [new Date().getFullYear(), 'سنة التأسيس لا يمكن أن تكون في المستقبل']
+    },
+    dean: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Faculty',
+      required: true,
       validate: {
-        validator: function(v) {
-          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+        validator: async function (v) {
+          const faculty = await mongoose.model('Faculty').findById(v);
+          return faculty && faculty.designation === 'professor';
         },
-        message: 'البريد الإلكتروني غير صالح'
+        message: 'عميد الكلية يجب أن يكون بروفيسور'
       }
-    }
-  },
-  website: {
-    type: String,
-    validate: {
-      validator: function(v) {
-        return /^(http|https):\/\/[^ "]+$/.test(v);
+    },
+    viceDeans: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Faculty'
+      }
+    ],
+    location: {
+      building: String,
+      floor: Number,
+      coordinates: {
+        lat: Number,
+        lng: Number
+      }
+    },
+    contact: {
+      phone: {
+        type: String,
+        validate: {
+          validator: function (v) {
+            return (/^01[0-9]{9}$/).test(v);
+          },
+          message: 'رقم الهاتف غير صالح'
+        }
       },
-      message: 'رابط الموقع الإلكتروني غير صالح'
+      email: {
+        type: String,
+        lowercase: true,
+        validate: {
+          validator: function (v) {
+            return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/).test(v);
+          },
+          message: 'البريد الإلكتروني غير صالح'
+        }
+      }
+    },
+    website: {
+      type: String,
+      validate: {
+        validator: function (v) {
+          return (/^(http|https):\/\/[^ "]+$/).test(v);
+        },
+        message: 'رابط الموقع الإلكتروني غير صالح'
+      }
+    },
+    isActive: {
+      type: Boolean,
+      default: true
+    },
+    lastUpdatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Admin'
     }
   },
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  lastUpdatedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Admin'
+  {
+    timestamps: true,
+    toJSON: {virtuals: true},
+    toObject: {virtuals: true}
   }
-}, { 
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
+);
 
-// Indexes for performance
-collegeSchema.index({ code: 1 }, { unique: true });
-collegeSchema.index({ dean: 1 });
+// Compound unique index for university + code
+collegeSchema.index({university: 1, code: 1}, {unique: true});
+collegeSchema.index({university: 1});
+collegeSchema.index({dean: 1});
+collegeSchema.index({isActive: 1});
 
 // Virtual for departments count
 collegeSchema.virtual('departmentsCount', {

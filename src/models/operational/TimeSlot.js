@@ -15,7 +15,7 @@ const timeSlotSchema = new mongoose.Schema({
     type: String,
     required: [true, 'يجب تحديد وقت البداية'],
     validate: {
-      validator: v => /^(0[8-9]|1[0-9]|2[0-1]):[0-5][0-9]$/.test(v),
+      validator: v => (/^(0[8-9]|1[0-9]|2[0-1]):[0-5][0-9]$/).test(v),
       message: 'وقت البداية يجب أن يكون بين 08:00 و21:00'
     }
   },
@@ -23,8 +23,8 @@ const timeSlotSchema = new mongoose.Schema({
     type: String,
     required: [true, 'يجب تحديد وقت النهاية'],
     validate: {
-      validator: function(v) {
-        if (!this.startTime) return true;
+      validator: function (v) {
+        if (!this.startTime) { return true; }
         const start = parseInt(this.startTime.replace(':', ''));
         const end = parseInt(v.replace(':', ''));
         return end > start && (end - start) <= 300; // لا تزيد عن 3 ساعات
@@ -46,18 +46,19 @@ const timeSlotSchema = new mongoose.Schema({
 });
 
 // Middleware لمنع التعارض في القاعات
-timeSlotSchema.pre('save', async function(next) {
+timeSlotSchema.pre('save', async function (next) {
   const conflict = await mongoose.model('TimeSlot').findOne({
-    _id: { $ne: this._id },
+    _id: {$ne: this._id},
     day: this.day,
     classroom: this.schedule.classroom,
     $or: [
-      { 
-        startTime: { $lt: this.endTime },
-        endTime: { $gt: this.startTime }
+      {
+        startTime: {$lt: this.endTime},
+        endTime: {$gt: this.startTime}
       }
     ]
-  }).populate('schedule');
+  })
+    .populate('schedule');
 
   if (conflict) {
     throw new Error(`تعارض في القاعة مع مادة ${conflict.schedule.subject.name}`);
@@ -66,11 +67,11 @@ timeSlotSchema.pre('save', async function(next) {
 });
 
 // Indexes
-timeSlotSchema.index({ 
+timeSlotSchema.index({
   schedule: 1,
   day: 1,
   startTime: 1,
   endTime: 1
-}, { unique: true });
+}, {unique: true});
 
 export const TimeSlot = mongoose.model('TimeSlot', timeSlotSchema);

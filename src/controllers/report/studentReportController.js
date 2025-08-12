@@ -1,9 +1,9 @@
-import { Attendance } from '../../models/operational/Attendance.js';
-import { Schedule } from '../../models/academic/Schedule.js';
-import { Subject } from '../../models/academic/Subject.js';
-import { Student } from '../../models/user/Student.js';
-import { catchAsync } from '../../utils/catchAsync.js';
-import { AppError } from '../../utils/AppError.js';
+import {Attendance} from '../../models/operational/Attendance.js';
+import {Schedule} from '../../models/academic/Schedule.js';
+import {Subject} from '../../models/academic/Subject.js';
+import {Student} from '../../models/user/Student.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {AppError} from '../../utils/AppError.js';
 import reportService from '../../services/reportService.js';
 
 /**
@@ -12,7 +12,7 @@ import reportService from '../../services/reportService.js';
  * @access  private (student)
  */
 export const getStudentAttendanceReport = catchAsync(async (req, res, next) => {
-  const { startDate, endDate, subjectId } = req.query;
+  const {startDate, endDate, subjectId} = req.query;
   const studentId = req.user._id;
 
   const filterQuery = {
@@ -29,18 +29,18 @@ export const getStudentAttendanceReport = catchAsync(async (req, res, next) => {
 
   if (subjectId) {
     // البحث عن الجداول التي تحتوي على هذه المادة
-    const schedules = await Schedule.find({ subjectId, isActive: true });
+    const schedules = await Schedule.find({subjectId, isActive: true});
     const scheduleIds = schedules.map(s => s._id);
-    filterQuery.scheduleId = { $in: scheduleIds };
+    filterQuery.scheduleId = {$in: scheduleIds};
   }
 
   // إحصائيات الحضور
   const attendanceStats = await Attendance.aggregate([
-    { $match: filterQuery },
+    {$match: filterQuery},
     {
       $group: {
         _id: '$status',
-        count: { $sum: 1 }
+        count: {$sum: 1}
       }
     }
   ]);
@@ -70,7 +70,7 @@ export const getStudentAttendanceReport = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    data: { report }
+    data: {report}
   });
 });
 
@@ -84,7 +84,7 @@ export const getStudentSubjectsReport = catchAsync(async (req, res, next) => {
 
   // الحصول على المواد المسجل فيها الطالب
   const subjectsData = await Attendance.aggregate([
-    { $match: { studentId, type: 'student' } },
+    {$match: {studentId, type: 'student'}},
     {
       $lookup: {
         from: 'schedules',
@@ -93,7 +93,7 @@ export const getStudentSubjectsReport = catchAsync(async (req, res, next) => {
         as: 'schedule'
       }
     },
-    { $unwind: '$schedule' },
+    {$unwind: '$schedule'},
     {
       $lookup: {
         from: 'subjects',
@@ -102,7 +102,7 @@ export const getStudentSubjectsReport = catchAsync(async (req, res, next) => {
         as: 'subject'
       }
     },
-    { $unwind: '$subject' },
+    {$unwind: '$subject'},
     {
       $lookup: {
         from: 'faculties',
@@ -111,27 +111,27 @@ export const getStudentSubjectsReport = catchAsync(async (req, res, next) => {
         as: 'faculty'
       }
     },
-    { $unwind: '$faculty' },
+    {$unwind: '$faculty'},
     {
       $group: {
         _id: '$subject._id',
-        subjectName: { $first: '$subject.name' },
-        subjectCode: { $first: '$subject.code' },
-        facultyName: { $first: '$faculty.name' },
-        totalSessions: { $sum: 1 },
+        subjectName: {$first: '$subject.name'},
+        subjectCode: {$first: '$subject.code'},
+        facultyName: {$first: '$faculty.name'},
+        totalSessions: {$sum: 1},
         presentSessions: {
           $sum: {
-            $cond: [{ $eq: ['$status', 'present'] }, 1, 0]
+            $cond: [{$eq: ['$status', 'present']}, 1, 0]
           }
         },
         absentSessions: {
           $sum: {
-            $cond: [{ $eq: ['$status', 'absent'] }, 1, 0]
+            $cond: [{$eq: ['$status', 'absent']}, 1, 0]
           }
         },
         lateSessions: {
           $sum: {
-            $cond: [{ $eq: ['$status', 'late'] }, 1, 0]
+            $cond: [{$eq: ['$status', 'late']}, 1, 0]
           }
         }
       }
@@ -142,7 +142,7 @@ export const getStudentSubjectsReport = catchAsync(async (req, res, next) => {
           $multiply: [
             {
               $divide: [
-                { $add: ['$presentSessions', '$lateSessions'] },
+                {$add: ['$presentSessions', '$lateSessions']},
                 '$totalSessions'
               ]
             },
@@ -151,13 +151,13 @@ export const getStudentSubjectsReport = catchAsync(async (req, res, next) => {
         }
       }
     },
-    { $sort: { subjectName: 1 } }
+    {$sort: {subjectName: 1}}
   ]);
 
   res.status(200).json({
     status: 'success',
     results: subjectsData.length,
-    data: { subjectsData }
+    data: {subjectsData}
   });
 });
 
@@ -167,17 +167,17 @@ export const getStudentSubjectsReport = catchAsync(async (req, res, next) => {
  * @access  private (student)
  */
 export const getStudentSubjectReport = catchAsync(async (req, res, next) => {
-  const { subjectId } = req.params;
-  const { startDate, endDate } = req.query;
+  const {subjectId} = req.params;
+  const {startDate, endDate} = req.query;
   const studentId = req.user._id;
 
   // البحث عن الجداول التي تحتوي على هذه المادة
-  const schedules = await Schedule.find({ subjectId, isActive: true });
+  const schedules = await Schedule.find({subjectId, isActive: true});
   const scheduleIds = schedules.map(s => s._id);
 
   const filterQuery = {
     studentId,
-    scheduleId: { $in: scheduleIds },
+    scheduleId: {$in: scheduleIds},
     type: 'student'
   };
 
@@ -196,11 +196,11 @@ export const getStudentSubjectReport = catchAsync(async (req, res, next) => {
 
   // إحصائيات الحضور
   const attendanceStats = await Attendance.aggregate([
-    { $match: filterQuery },
+    {$match: filterQuery},
     {
       $group: {
         _id: '$status',
-        count: { $sum: 1 }
+        count: {$sum: 1}
       }
     }
   ]);
@@ -231,7 +231,7 @@ export const getStudentSubjectReport = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    data: { subjectReport }
+    data: {subjectReport}
   });
 });
 
@@ -241,7 +241,7 @@ export const getStudentSubjectReport = catchAsync(async (req, res, next) => {
  * @access  private (student)
  */
 export const getStudentDailyReport = catchAsync(async (req, res, next) => {
-  const { date } = req.query;
+  const {date} = req.query;
   const studentId = req.user._id;
 
   const reportDate = date ? new Date(date) : new Date();
@@ -253,7 +253,7 @@ export const getStudentDailyReport = catchAsync(async (req, res, next) => {
   // سجلات الحضور لهذا اليوم
   const attendanceRecords = await Attendance.find({
     studentId,
-    date: { $gte: startOfDay, $lte: endOfDay },
+    date: {$gte: startOfDay, $lte: endOfDay},
     type: 'student'
   })
     .populate('scheduleId', 'subjectId dayOfWeek startTime endTime facultyId')
@@ -265,14 +265,14 @@ export const getStudentDailyReport = catchAsync(async (req, res, next) => {
     {
       $match: {
         studentId,
-        date: { $gte: startOfDay, $lte: endOfDay },
+        date: {$gte: startOfDay, $lte: endOfDay},
         type: 'student'
       }
     },
     {
       $group: {
         _id: '$status',
-        count: { $sum: 1 }
+        count: {$sum: 1}
       }
     }
   ]);
@@ -296,7 +296,7 @@ export const getStudentDailyReport = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    data: { dailyReport }
+    data: {dailyReport}
   });
 });
 
@@ -306,7 +306,7 @@ export const getStudentDailyReport = catchAsync(async (req, res, next) => {
  * @access  private (student)
  */
 export const getStudentMonthlyReport = catchAsync(async (req, res, next) => {
-  const { year, month } = req.query;
+  const {year, month} = req.query;
   const studentId = req.user._id;
 
   const startDate = new Date(year || new Date().getFullYear(), month ? month - 1 : new Date().getMonth(), 1);
@@ -317,17 +317,17 @@ export const getStudentMonthlyReport = catchAsync(async (req, res, next) => {
     {
       $match: {
         studentId,
-        date: { $gte: startDate, $lte: endDate },
+        date: {$gte: startDate, $lte: endDate},
         type: 'student'
       }
     },
     {
       $group: {
         _id: {
-          date: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
+          date: {$dateToString: {format: '%Y-%m-%d', date: '$date'}},
           status: '$status'
         },
-        count: { $sum: 1 }
+        count: {$sum: 1}
       }
     },
     {
@@ -339,10 +339,10 @@ export const getStudentMonthlyReport = catchAsync(async (req, res, next) => {
             count: '$count'
           }
         },
-        total: { $sum: '$count' }
+        total: {$sum: '$count'}
       }
     },
-    { $sort: { _id: 1 } }
+    {$sort: {_id: 1}}
   ]);
 
   // إحصائيات المواد
@@ -350,7 +350,7 @@ export const getStudentMonthlyReport = catchAsync(async (req, res, next) => {
     {
       $match: {
         studentId,
-        date: { $gte: startDate, $lte: endDate },
+        date: {$gte: startDate, $lte: endDate},
         type: 'student'
       }
     },
@@ -362,7 +362,7 @@ export const getStudentMonthlyReport = catchAsync(async (req, res, next) => {
         as: 'schedule'
       }
     },
-    { $unwind: '$schedule' },
+    {$unwind: '$schedule'},
     {
       $lookup: {
         from: 'subjects',
@@ -371,26 +371,26 @@ export const getStudentMonthlyReport = catchAsync(async (req, res, next) => {
         as: 'subject'
       }
     },
-    { $unwind: '$subject' },
+    {$unwind: '$subject'},
     {
       $group: {
         _id: '$subject._id',
-        subjectName: { $first: '$subject.name' },
-        subjectCode: { $first: '$subject.code' },
-        totalSessions: { $sum: 1 },
+        subjectName: {$first: '$subject.name'},
+        subjectCode: {$first: '$subject.code'},
+        totalSessions: {$sum: 1},
         presentSessions: {
           $sum: {
-            $cond: [{ $eq: ['$status', 'present'] }, 1, 0]
+            $cond: [{$eq: ['$status', 'present']}, 1, 0]
           }
         },
         absentSessions: {
           $sum: {
-            $cond: [{ $eq: ['$status', 'absent'] }, 1, 0]
+            $cond: [{$eq: ['$status', 'absent']}, 1, 0]
           }
         },
         lateSessions: {
           $sum: {
-            $cond: [{ $eq: ['$status', 'late'] }, 1, 0]
+            $cond: [{$eq: ['$status', 'late']}, 1, 0]
           }
         }
       }
@@ -401,7 +401,7 @@ export const getStudentMonthlyReport = catchAsync(async (req, res, next) => {
           $multiply: [
             {
               $divide: [
-                { $add: ['$presentSessions', '$lateSessions'] },
+                {$add: ['$presentSessions', '$lateSessions']},
                 '$totalSessions'
               ]
             },
@@ -413,14 +413,14 @@ export const getStudentMonthlyReport = catchAsync(async (req, res, next) => {
   ]);
 
   const monthlyReport = {
-    period: { startDate, endDate },
+    period: {startDate, endDate},
     dailyStats: monthlyStats,
     subjectsStats
   };
 
   res.status(200).json({
     status: 'success',
-    data: { monthlyReport }
+    data: {monthlyReport}
   });
 });
 
@@ -434,11 +434,11 @@ export const getStudentOverview = catchAsync(async (req, res, next) => {
 
   // إحصائيات الحضور العامة
   const overallStats = await Attendance.aggregate([
-    { $match: { studentId, type: 'student' } },
+    {$match: {studentId, type: 'student'}},
     {
       $group: {
         _id: '$status',
-        count: { $sum: 1 }
+        count: {$sum: 1}
       }
     }
   ]);
@@ -450,7 +450,7 @@ export const getStudentOverview = catchAsync(async (req, res, next) => {
 
   // عدد المواد المسجل فيها
   const subjectsCount = await Attendance.aggregate([
-    { $match: { studentId, type: 'student' } },
+    {$match: {studentId, type: 'student'}},
     {
       $lookup: {
         from: 'schedules',
@@ -459,7 +459,7 @@ export const getStudentOverview = catchAsync(async (req, res, next) => {
         as: 'schedule'
       }
     },
-    { $unwind: '$schedule' },
+    {$unwind: '$schedule'},
     {
       $group: {
         _id: '$schedule.subjectId'
@@ -485,6 +485,6 @@ export const getStudentOverview = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    data: { overview }
+    data: {overview}
   });
 });

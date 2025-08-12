@@ -6,8 +6,8 @@ const academicYearSchema = new mongoose.Schema({
     required: [true, 'اسم السنة الأكاديمية مطلوب'],
     unique: true,
     validate: {
-      validator: function(v) {
-        return /^[0-9]{4}-[0-9]{4}$/.test(v);
+      validator: function (v) {
+        return (/^[0-9]{4}-[0-9]{4}$/).test(v);
       },
       message: 'الصيغة الصحيحة: YYYY-YYYY (مثال: 2023-2024)'
     }
@@ -16,7 +16,7 @@ const academicYearSchema = new mongoose.Schema({
     type: Date,
     required: [true, 'تاريخ البداية مطلوب'],
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         return v < this.endDate;
       },
       message: 'تاريخ البداية يجب أن يكون قبل تاريخ النهاية'
@@ -50,21 +50,21 @@ const academicYearSchema = new mongoose.Schema({
     ref: 'Admin',
     required: true
   }
-}, { timestamps: true });
+}, {timestamps: true});
 
 // Middleware to ensure only one current academic year
-academicYearSchema.pre('save', async function(next) {
+academicYearSchema.pre('save', async function (next) {
   if (this.isCurrent) {
     await mongoose.model('AcademicYear').updateMany(
-      { _id: { $ne: this._id } },
-      { $set: { isCurrent: false } }
+      {_id: {$ne: this._id}},
+      {$set: {isCurrent: false}}
     );
   }
   next();
 });
 
 // Middleware for semesters
-academicYearSchema.pre('save', function(next) {
+academicYearSchema.pre('save', function (next) {
   this.semesters.forEach(semester => {
     if (semester.startDate >= semester.endDate) {
       throw new Error('تاريخ بداية الفصل يجب أن يكون قبل تاريخ النهاية');

@@ -7,8 +7,8 @@ import {
   getStudentMonthlyReport,
   getStudentOverview
 } from '../../controllers/report/studentReportController.js';
-import { authenticate } from '../../middlewares/auth/authenticate.js';
-import { authorize } from '../../middlewares/auth/authorize.js';
+import {authenticate} from '../../middlewares/auth/authenticate.js';
+import {authorize} from '../../middlewares/auth/authorize.js';
 
 const router = express.Router();
 

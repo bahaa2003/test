@@ -1,8 +1,8 @@
-import { Subject } from '../../models/academic/Subject.js';
-import { Department } from '../../models/academic/Department.js';
-import { catchAsync } from '../../utils/catchAsync.js';
-import { AppError } from '../../utils/AppError.js';
-import { ApiFeatures } from '../../utils/ApiFeatures.js';
+import {Subject} from '../../models/academic/Subject.js';
+import {Department} from '../../models/academic/Department.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {AppError} from '../../utils/AppError.js';
+import {ApiFeatures} from '../../utils/ApiFeatures.js';
 
 /**
  * @desc    إنشاء مادة جديدة
@@ -17,7 +17,7 @@ export const createSubject = catchAsync(async (req, res, next) => {
   }
 
   const subject = await Subject.create(req.body);
-  res.status(201).json({ status: 'success', data: { subject } });
+  res.status(201).json({status: 'success', data: {subject}});
 });
 
 /**
@@ -39,7 +39,7 @@ export const getAllSubjects = catchAsync(async (req, res, next) => {
     status: 'success',
     results: subjects.length,
     total,
-    data: { subjects }
+    data: {subjects}
   });
 });
 
@@ -55,7 +55,7 @@ export const getSubjectById = catchAsync(async (req, res, next) => {
     return next(new AppError('المادة غير موجودة', 404));
   }
 
-  res.status(200).json({ status: 'success', data: { subject } });
+  res.status(200).json({status: 'success', data: {subject}});
 });
 
 /**
@@ -81,7 +81,7 @@ export const updateSubject = catchAsync(async (req, res, next) => {
     return next(new AppError('المادة غير موجودة', 404));
   }
 
-  res.status(200).json({ status: 'success', data: { subject } });
+  res.status(200).json({status: 'success', data: {subject}});
 });
 
 /**
@@ -96,7 +96,7 @@ export const deleteSubject = catchAsync(async (req, res, next) => {
     return next(new AppError('المادة غير موجودة', 404));
   }
 
-  res.status(204).json({ status: 'success', data: null });
+  res.status(204).json({status: 'success', data: null});
 });
 
 /**
@@ -113,7 +113,7 @@ export const getSubjectsByDepartment = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: subjects.length,
-    data: { subjects }
+    data: {subjects}
   });
 });
 
@@ -123,14 +123,14 @@ export const getSubjectsByDepartment = catchAsync(async (req, res, next) => {
  * @access  public
  */
 export const getActiveSubjects = catchAsync(async (req, res, next) => {
-  const subjects = await Subject.find({ isActive: true })
+  const subjects = await Subject.find({isActive: true})
     .populate('departmentId', 'name code')
     .select('name code credits departmentId');
 
   res.status(200).json({
     status: 'success',
     results: subjects.length,
-    data: { subjects }
+    data: {subjects}
   });
 });
 
@@ -140,7 +140,7 @@ export const getActiveSubjects = catchAsync(async (req, res, next) => {
  * @access  public
  */
 export const searchSubjects = catchAsync(async (req, res, next) => {
-  const { q } = req.query;
+  const {q} = req.query;
 
   if (!q) {
     return next(new AppError('مطلوب كلمة بحث', 400));
@@ -148,9 +148,9 @@ export const searchSubjects = catchAsync(async (req, res, next) => {
 
   const subjects = await Subject.find({
     $or: [
-      { name: { $regex: q, $options: 'i' } },
-      { code: { $regex: q, $options: 'i' } },
-      { description: { $regex: q, $options: 'i' } }
+      {name: {$regex: q, $options: 'i'}},
+      {code: {$regex: q, $options: 'i'}},
+      {description: {$regex: q, $options: 'i'}}
     ],
     isActive: true
   }).populate('departmentId', 'name code');
@@ -158,6 +158,6 @@ export const searchSubjects = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: subjects.length,
-    data: { subjects }
+    data: {subjects}
   });
 });

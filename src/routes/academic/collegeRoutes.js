@@ -7,8 +7,8 @@ import {
   deleteCollege,
   getActiveColleges
 } from '../../controllers/academic/collegeController.js';
-import { authenticate } from '../../middlewares/auth/authenticate.js';
-import { authorize } from '../../middlewares/auth/authorize.js';
+import {authenticate} from '../../middlewares/auth/authenticate.js';
+import {authorize} from '../../middlewares/auth/authorize.js';
 
 const router = express.Router();
 

@@ -1,13 +1,13 @@
-import { Server } from 'socket.io';
+import {Server} from 'socket.io';
 import jwt from 'jsonwebtoken';
-import config from '../../config/config.js';
+import config from '../config/config.js';
 import logger from '../utils/logger.js';
 
 /**
  * إعداد Socket.IO للتواصل في الوقت الفعلي
  */
 class SocketManager {
-  constructor() {
+  constructor () {
     this.io = null;
     this.connectedUsers = new Map();
   }
@@ -15,7 +15,7 @@ class SocketManager {
   /**
    * تهيئة Socket.IO
    */
-  initialize(server) {
+  initialize (server) {
     this.io = new Server(server, {
       cors: {
         origin: config.security.corsOrigin || 'http://localhost:3000',
@@ -34,7 +34,7 @@ class SocketManager {
   /**
    * إعداد middleware للمصادقة
    */
-  setupMiddleware() {
+  setupMiddleware () {
     this.io.use(async (socket, next) => {
       try {
         const token = socket.handshake.auth.token || socket.handshake.headers.authorization;
@@ -58,8 +58,8 @@ class SocketManager {
   /**
    * إعداد معالجات الأحداث
    */
-  setupEventHandlers() {
-    this.io.on('connection', (socket) => {
+  setupEventHandlers () {
+    this.io.on('connection', socket => {
       logger.info(`User connected: ${socket.userId} (${socket.userRole})`);
 
       // تخزين معلومات المستخدم المتصل
@@ -79,7 +79,7 @@ class SocketManager {
       });
 
       // معالج رسائل الحضور
-      socket.on('attendance_recorded', (data) => {
+      socket.on('attendance_recorded', data => {
         this.handleAttendanceRecorded(socket, data);
       });
 
@@ -89,17 +89,17 @@ class SocketManager {
       });
 
       // معالج رسائل المدرسين
-      socket.on('faculty_message', (data) => {
+      socket.on('faculty_message', data => {
         this.handleFacultyMessage(socket, data);
       });
 
       // معالج رسائل الطلاب
-      socket.on('student_message', (data) => {
+      socket.on('student_message', data => {
         this.handleStudentMessage(socket, data);
       });
 
       // معالج رسائل الإدارة
-      socket.on('admin_message', (data) => {
+      socket.on('admin_message', data => {
         this.handleAdminMessage(socket, data);
       });
     });
@@ -108,7 +108,7 @@ class SocketManager {
   /**
    * انضمام المستخدم إلى الغرف المناسبة
    */
-  joinUserRooms(socket) {
+  joinUserRooms (socket) {
     // انضمام جميع المستخدمين إلى الغرفة العامة
     socket.join('general');
 
@@ -135,9 +135,9 @@ class SocketManager {
   /**
    * معالجة تسجيل الحضور
    */
-  handleAttendanceRecorded(socket, data) {
+  handleAttendanceRecorded (socket, data) {
     try {
-      const { studentId, subjectId, status } = data;
+      const {studentId, subjectId, status} = data;
 
       // إرسال إشعار للمدرس
       this.io.to('faculty').emit('attendance_update', {
@@ -155,7 +155,9 @@ class SocketManager {
         timestamp: new Date()
       });
 
-      logger.info(`Attendance recorded via socket: Student ${studentId}, Subject ${subjectId}, Status ${status}`);
+      logger.info(
+        `Attendance recorded via socket: Student ${studentId}, Subject ${subjectId}, Status ${status}`
+      );
     } catch (error) {
       logger.error('Error handling attendance recorded:', error);
     }
@@ -164,7 +166,7 @@ class SocketManager {
   /**
    * معالجة طلب الحالة
    */
-  handleGetStatus(socket) {
+  handleGetStatus (socket) {
     const status = {
       userId: socket.userId,
       role: socket.userRole,
@@ -178,13 +180,13 @@ class SocketManager {
   /**
    * معالجة رسائل المدرسين
    */
-  handleFacultyMessage(socket, data) {
+  handleFacultyMessage (socket, data) {
     if (socket.userRole !== 'faculty' && socket.userRole !== 'admin') {
-      socket.emit('error', { message: 'Unauthorized' });
+      socket.emit('error', {message: 'Unauthorized'});
       return;
     }
 
-    const { message, targetRoom, targetUserId } = data;
+    const {message, targetRoom, targetUserId} = data;
 
     if (targetRoom) {
       this.io.to(targetRoom).emit('faculty_message', {
@@ -204,13 +206,13 @@ class SocketManager {
   /**
    * معالجة رسائل الطلاب
    */
-  handleStudentMessage(socket, data) {
+  handleStudentMessage (socket, data) {
     if (socket.userRole !== 'student') {
-      socket.emit('error', { message: 'Unauthorized' });
+      socket.emit('error', {message: 'Unauthorized'});
       return;
     }
 
-    const { message, targetUserId } = data;
+    const {message, targetUserId} = data;
 
     if (targetUserId) {
       this.io.to(`user_${targetUserId}`).emit('student_message', {
@@ -224,13 +226,13 @@ class SocketManager {
   /**
    * معالجة رسائل الإدارة
    */
-  handleAdminMessage(socket, data) {
+  handleAdminMessage (socket, data) {
     if (socket.userRole !== 'admin') {
-      socket.emit('error', { message: 'Unauthorized' });
+      socket.emit('error', {message: 'Unauthorized'});
       return;
     }
 
-    const { message, targetRoom, targetUserId, targetRole } = data;
+    const {message, targetRoom, targetUserId, targetRole} = data;
 
     if (targetRoom) {
       this.io.to(targetRoom).emit('admin_message', {
@@ -256,7 +258,7 @@ class SocketManager {
   /**
    * إرسال إشعار لجميع المستخدمين
    */
-  broadcastNotification(notification) {
+  broadcastNotification (notification) {
     this.io.emit('notification', {
       ...notification,
       timestamp: new Date()
@@ -266,7 +268,7 @@ class SocketManager {
   /**
    * إرسال إشعار لمستخدم محدد
    */
-  sendNotificationToUser(userId, notification) {
+  sendNotificationToUser (userId, notification) {
     this.io.to(`user_${userId}`).emit('notification', {
       ...notification,
       timestamp: new Date()
@@ -276,7 +278,7 @@ class SocketManager {
   /**
    * إرسال إشعار لمجموعة من المستخدمين
    */
-  sendNotificationToRole(role, notification) {
+  sendNotificationToRole (role, notification) {
     this.io.to(role).emit('notification', {
       ...notification,
       timestamp: new Date()
@@ -286,7 +288,7 @@ class SocketManager {
   /**
    * الحصول على إحصائيات الاتصالات
    */
-  getConnectionStats() {
+  getConnectionStats () {
     return {
       totalConnected: this.connectedUsers.size,
       connectedUsers: Array.from(this.connectedUsers.entries()).map(([userId, data]) => ({
@@ -300,7 +302,7 @@ class SocketManager {
   /**
    * إغلاق جميع الاتصالات
    */
-  disconnectAll() {
+  disconnectAll () {
     this.io.disconnectSockets();
     this.connectedUsers.clear();
     logger.info('All socket connections closed');

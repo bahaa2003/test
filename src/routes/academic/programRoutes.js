@@ -7,9 +7,9 @@ import {
   deleteProgram,
   getProgramsByDepartment
 } from '../../controllers/academic/programController.js';
-import { authenticate } from '../../middlewares/auth/authenticate.js';
-import { authorize } from '../../middlewares/auth/authorize.js';
-import { validateProgram } from '../../middlewares/validations/academicValidation.js';
+import {authenticate} from '../../middlewares/auth/authenticate.js';
+import {authorize} from '../../middlewares/auth/authorize.js';
+import {validateProgram} from '../../middlewares/validations/academicValidation.js';
 
 const router = express.Router();
 

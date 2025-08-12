@@ -8,8 +8,8 @@ import {
   getDepartmentsByCollege,
   getActiveDepartments
 } from '../../controllers/academic/departmentController.js';
-import { authenticate } from '../../middlewares/auth/authenticate.js';
-import { authorize } from '../../middlewares/auth/authorize.js';
+import {authenticate} from '../../middlewares/auth/authenticate.js';
+import {authorize} from '../../middlewares/auth/authorize.js';
 
 const router = express.Router();
 

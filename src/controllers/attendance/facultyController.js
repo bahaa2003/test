@@ -1,9 +1,9 @@
-import { Faculty } from '../../models/user/Faculty.js';
-import { Attendance } from '../../models/operational/Attendance.js';
-import { Schedule } from '../../models/academic/Schedule.js';
-import { catchAsync } from '../../utils/catchAsync.js';
-import { AppError } from '../../utils/AppError.js';
-import { ApiFeatures } from '../../utils/ApiFeatures.js';
+import {Faculty} from '../../models/user/Faculty.js';
+import {Attendance} from '../../models/operational/Attendance.js';
+import {Schedule} from '../../models/academic/Schedule.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {AppError} from '../../utils/AppError.js';
+import {ApiFeatures} from '../../utils/ApiFeatures.js';
 
 /**
  * @desc    تسجيل حضور عضو هيئة التدريس
@@ -11,7 +11,7 @@ import { ApiFeatures } from '../../utils/ApiFeatures.js';
  * @access  private (faculty)
  */
 export const recordFacultyAttendance = catchAsync(async (req, res, next) => {
-  const { scheduleId, date, status, notes } = req.body;
+  const {scheduleId, date, status, notes} = req.body;
 
   // التحقق من وجود الجدول
   const schedule = await Schedule.findById(scheduleId);
@@ -44,7 +44,7 @@ export const recordFacultyAttendance = catchAsync(async (req, res, next) => {
     type: 'faculty'
   });
 
-  res.status(201).json({ status: 'success', data: { attendance } });
+  res.status(201).json({status: 'success', data: {attendance}});
 });
 
 /**
@@ -53,7 +53,7 @@ export const recordFacultyAttendance = catchAsync(async (req, res, next) => {
  * @access  private (faculty, admin)
  */
 export const getFacultyAttendance = catchAsync(async (req, res, next) => {
-  const { facultyId, startDate, endDate, scheduleId } = req.query;
+  const {facultyId, startDate, endDate, scheduleId} = req.query;
 
   // تحديد معرف الأستاذ (يمكن للأدمن الوصول لأي أستاذ)
   const targetFacultyId = req.user.role === 'admin' ? facultyId : req.user._id;
@@ -94,7 +94,7 @@ export const getFacultyAttendance = catchAsync(async (req, res, next) => {
     status: 'success',
     results: attendance.length,
     total,
-    data: { attendance }
+    data: {attendance}
   });
 });
 
@@ -118,10 +118,10 @@ export const updateFacultyAttendance = catchAsync(async (req, res, next) => {
   const updatedAttendance = await Attendance.findByIdAndUpdate(
     req.params.id,
     req.body,
-    { new: true, runValidators: true }
+    {new: true, runValidators: true}
   ).populate('scheduleId', 'subjectId facultyId');
 
-  res.status(200).json({ status: 'success', data: { attendance: updatedAttendance } });
+  res.status(200).json({status: 'success', data: {attendance: updatedAttendance}});
 });
 
 /**
@@ -130,7 +130,7 @@ export const updateFacultyAttendance = catchAsync(async (req, res, next) => {
  * @access  private (faculty, admin)
  */
 export const getFacultyAttendanceStats = catchAsync(async (req, res, next) => {
-  const { facultyId, startDate, endDate } = req.query;
+  const {facultyId, startDate, endDate} = req.query;
 
   const targetFacultyId = req.user.role === 'admin' ? facultyId : req.user._id;
 
@@ -151,11 +151,11 @@ export const getFacultyAttendanceStats = catchAsync(async (req, res, next) => {
   }
 
   const stats = await Attendance.aggregate([
-    { $match: filterQuery },
+    {$match: filterQuery},
     {
       $group: {
         _id: '$status',
-        count: { $sum: 1 }
+        count: {$sum: 1}
       }
     }
   ]);
@@ -185,7 +185,7 @@ export const getFacultyAttendanceStats = catchAsync(async (req, res, next) => {
  * @access  private (faculty, admin)
  */
 export const getFacultySchedules = catchAsync(async (req, res, next) => {
-  const { facultyId } = req.query;
+  const {facultyId} = req.query;
 
   const targetFacultyId = req.user.role === 'admin' ? facultyId : req.user._id;
 
@@ -203,6 +203,6 @@ export const getFacultySchedules = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: schedules.length,
-    data: { schedules }
+    data: {schedules}
   });
 });

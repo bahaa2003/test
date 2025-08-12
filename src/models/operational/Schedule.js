@@ -6,7 +6,7 @@ const scheduleSchema = new mongoose.Schema({
     ref: 'Subject',
     required: [true, 'يجب تحديد المادة الدراسية'],
     validate: {
-      validator: async function(subjectId) {
+      validator: async function (subjectId) {
         const subject = await mongoose.model('Subject').findById(subjectId);
         return subject && subject.isActive;
       },
@@ -18,7 +18,7 @@ const scheduleSchema = new mongoose.Schema({
     ref: 'Faculty',
     required: [true, 'يجب تحديد عضو هيئة التدريس'],
     validate: {
-      validator: async function(facultyId) {
+      validator: async function (facultyId) {
         const faculty = await mongoose.model('Faculty').findById(facultyId);
         return faculty && faculty.isActive;
       },
@@ -43,8 +43,8 @@ const scheduleSchema = new mongoose.Schema({
     type: String,
     required: [true, 'يجب تحديد القاعة الدراسية'],
     validate: {
-      validator: function(v) {
-        return /^[A-Z]{1,2}-[0-9]{3}$/.test(v);
+      validator: function (v) {
+        return (/^[A-Z]{1,2}-[0-9]{3}$/).test(v);
       },
       message: 'تنسيق القاعة غير صحيح (مثال: A-101 أو AB-202)'
     }
@@ -59,7 +59,7 @@ const scheduleSchema = new mongoose.Schema({
     type: Number,
     default: 0,
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         return v <= this.maxStudents;
       },
       message: 'عدد الطلاب المسجلين يتجاوز السعة القصوى'
@@ -76,17 +76,17 @@ const scheduleSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toJSON: {virtuals: true},
+  toObject: {virtuals: true}
 });
 
 // Middleware للتحقق من عدم التعارض
-scheduleSchema.pre('save', async function(next) {
+scheduleSchema.pre('save', async function (next) {
   // التحقق من عدم تعارض عضو هيئة التدريس مع جدول آخر
   const conflictingSchedule = await mongoose.model('Schedule').findOne({
     faculty: this.faculty,
-    'timeSlots': { $in: this.timeSlots },
-    _id: { $ne: this._id }
+    timeSlots: {$in: this.timeSlots},
+    _id: {$ne: this._id}
   });
 
   if (conflictingSchedule) {
@@ -96,7 +96,7 @@ scheduleSchema.pre('save', async function(next) {
 });
 
 // Indexes
-scheduleSchema.index({ subject: 1, academicYear: 1, semester: 1 }, { unique: true });
-scheduleSchema.index({ faculty: 1, academicYear: 1 });
+scheduleSchema.index({subject: 1, academicYear: 1, semester: 1}, {unique: true});
+scheduleSchema.index({faculty: 1, academicYear: 1});
 
 export const Schedule = mongoose.model('Schedule', scheduleSchema);

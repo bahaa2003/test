@@ -13,8 +13,8 @@ const programSchema = new mongoose.Schema({
     unique: true,
     uppercase: true,
     validate: {
-      validator: function(v) {
-        return /^[A-Z]{2,6}[0-9]{0,2}$/.test(v);
+      validator: function (v) {
+        return (/^[A-Z]{2,6}[0-9]{0,2}$/).test(v);
       },
       message: 'كود البرنامج يجب أن يكون 2-6 أحرف لاتينية كبيرة متبوعة بأرقام اختيارية'
     }
@@ -67,10 +67,10 @@ const programSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   }
-}, { 
+}, {
   timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toJSON: {virtuals: true},
+  toObject: {virtuals: true}
 });
 
 // Virtual for courses

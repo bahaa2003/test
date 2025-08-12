@@ -2,7 +2,7 @@
 export const ADMIN_ROLES = ['admin', 'superAdmin', 'collegeAdmin'];
 export const FACULTY_DESIGNATIONS = [
   'professor',
-  'associateProfessor', 
+  'associateProfessor',
   'assistantProfessor',
   'lecturer',
   'teachingAssistant'

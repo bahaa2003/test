@@ -1,13 +1,26 @@
 import cron from 'node-cron';
-import { DailyReport } from '../models/report/DailyReport.js';
-import { SemesterReport } from '../models/report/SemesterReport.js';
-import { generatePDF } from './reportGenerators/pdfGenerator.js';
-import { sendEmailWithAttachment } from './emailService.js';
+// import {DailyReport} from '../models/report/DailyReport.js'; // TODO: Implement when needed
+import {SemesterReport} from '../models/report/SemesterReport.js';
+import {generatePDF} from './reportGenerators/pdfGenerator.js';
+import {sendEmailWithAttachment} from './emailService.js';
 import moment from 'moment';
+import logger from './logger.js';
 
 // جدولة التقرير اليومي الساعة 11 مساءً
 cron.schedule('0 23 * * *', async () => {
   try {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+
+    const DAILY_REPORT_HOUR = 5;
+    const DAILY_REPORT_MINUTE = 6;
+
+    // تشغيل التقرير اليومي في الساعة 5:30 صباحاً
+    if (hour !== DAILY_REPORT_HOUR || minute !== DAILY_REPORT_MINUTE) {
+      return;
+    }
+
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
 
@@ -31,13 +44,14 @@ cron.schedule('0 23 * * *', async () => {
       to: 'reports@university.edu',
       subject: `تقرير الحضور ${moment(yesterday).format('YYYY-MM-DD')}`,
       text: 'مرفق تقرير الحضور اليومي',
+      html: '<p>مرفق تقرير الحضور اليومي</p>',
       attachments: [{
         filename: `attendance-report-${moment(yesterday).format('YYYY-MM-DD')}.pdf`,
         content: pdfBuffer
       }]
     });
 
-    console.log(`تم إرسال التقرير اليومي لـ ${moment(yesterday).format('YYYY-MM-DD')}`);
+    logger.info(`تشغيل مولد التقارير اليومية... لـ ${moment(yesterday).format('YYYY-MM-DD')}`);
   } catch (err) {
     console.error('فشل في إنشاء التقرير اليومي:', err);
   }
@@ -59,20 +73,30 @@ cron.schedule('0 0 1 1,5,9 *', async () => {
     // تخزين التقرير في قاعدة البيانات
     await SemesterReport.create(report);
 
-    console.log(`تم إنشاء التقرير الفصلي للفصل ${semester}`);
+    logger.info(`تشغيل مولد التقارير الفصلية... للفصل ${semester}`);
   } catch (err) {
     console.error('فشل في إنشاء التقرير الفصلي:', err);
   }
 });
 
 // وظيفة مساعدة لإنشاء التقرير اليومي
-async function generateDailyReport(date) {
-  // ... (تنفيذ جمع البيانات من قاعدة البيانات)
+const generateDailyReport = async (_date) => {
+  // TODO: تنفيذ جمع البيانات من قاعدة البيانات
+  const processedData = {
+    date: _date,
+    status: 'generated',
+    message: 'تم إنشاء التقرير اليومي'
+  };
   return processedData;
-}
+};
 
 // وظيفة مساعدة لإنشاء التقرير الفصلي
-async function generateSemesterReport(semester) {
-  // ... (تنفيذ جمع البيانات من قاعدة البيانات)
+const generateSemesterReport = async (_semester) => {
+  // TODO: تنفيذ جمع البيانات من قاعدة البيانات
+  const processedData = {
+    semester: _semester,
+    status: 'generated',
+    message: 'تم إنشاء التقرير الفصلي'
+  };
   return processedData;
-}
+};

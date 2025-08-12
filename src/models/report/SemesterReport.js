@@ -46,12 +46,12 @@ const semesterReportSchema = new mongoose.Schema({
     excellentAttendance: {
       count: Number,
       percentage: Number,
-      threshold: { type: Number, default: 90 }
+      threshold: {type: Number, default: 90}
     },
     warningList: {
       count: Number,
       percentage: Number,
-      threshold: { type: Number, default: 60 }
+      threshold: {type: Number, default: 60}
     }
   },
   facultyStats: [{
@@ -79,16 +79,16 @@ const semesterReportSchema = new mongoose.Schema({
   publishedAt: Date
 }, {
   timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toJSON: {virtuals: true},
+  toObject: {virtuals: true}
 });
 
 // Indexes
-semesterReportSchema.index({ academicYear: 1, semester: 1 }, { unique: true });
-semesterReportSchema.index({ 'collegePerformance.college': 1 });
+semesterReportSchema.index({academicYear: 1, semester: 1}, {unique: true});
+semesterReportSchema.index({'collegePerformance.college': 1});
 
 // Virtual for semester title
-semesterReportSchema.virtual('title').get(function() {
+semesterReportSchema.virtual('title').get(function () {
   const semesterNames = {
     fall: 'الفصل الأول',
     spring: 'الفصل الثاني',

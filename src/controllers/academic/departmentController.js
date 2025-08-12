@@ -1,8 +1,8 @@
-import { Department } from '../../models/academic/Department.js';
-import { College } from '../../models/academic/College.js';
-import { catchAsync } from '../../utils/catchAsync.js';
-import { AppError } from '../../utils/AppError.js';
-import { ApiFeatures } from '../../utils/ApiFeatures.js';
+import {Department} from '../../models/academic/Department.js';
+import {College} from '../../models/academic/College.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {AppError} from '../../utils/AppError.js';
+import {ApiFeatures} from '../../utils/ApiFeatures.js';
 
 /**
  * @desc    إنشاء قسم جديد
@@ -17,7 +17,7 @@ export const createDepartment = catchAsync(async (req, res, next) => {
   }
 
   const department = await Department.create(req.body);
-  res.status(201).json({ status: 'success', data: { department } });
+  res.status(201).json({status: 'success', data: {department}});
 });
 
 /**
@@ -39,7 +39,7 @@ export const getAllDepartments = catchAsync(async (req, res, next) => {
     status: 'success',
     results: departments.length,
     total,
-    data: { departments }
+    data: {departments}
   });
 });
 
@@ -55,7 +55,7 @@ export const getDepartmentById = catchAsync(async (req, res, next) => {
     return next(new AppError('القسم غير موجود', 404));
   }
 
-  res.status(200).json({ status: 'success', data: { department } });
+  res.status(200).json({status: 'success', data: {department}});
 });
 
 /**
@@ -81,7 +81,7 @@ export const updateDepartment = catchAsync(async (req, res, next) => {
     return next(new AppError('القسم غير موجود', 404));
   }
 
-  res.status(200).json({ status: 'success', data: { department } });
+  res.status(200).json({status: 'success', data: {department}});
 });
 
 /**
@@ -96,7 +96,7 @@ export const deleteDepartment = catchAsync(async (req, res, next) => {
     return next(new AppError('القسم غير موجود', 404));
   }
 
-  res.status(204).json({ status: 'success', data: null });
+  res.status(204).json({status: 'success', data: null});
 });
 
 /**
@@ -113,7 +113,7 @@ export const getDepartmentsByCollege = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: departments.length,
-    data: { departments }
+    data: {departments}
   });
 });
 
@@ -123,13 +123,13 @@ export const getDepartmentsByCollege = catchAsync(async (req, res, next) => {
  * @access  public
  */
 export const getActiveDepartments = catchAsync(async (req, res, next) => {
-  const departments = await Department.find({ isActive: true })
+  const departments = await Department.find({isActive: true})
     .populate('collegeId', 'name code')
     .select('name code collegeId');
 
   res.status(200).json({
     status: 'success',
     results: departments.length,
-    data: { departments }
+    data: {departments}
   });
 });

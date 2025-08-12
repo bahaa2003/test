@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { ADMIN_ROLES } from '@/../config/constants.js';
+import {ADMIN_ROLES} from '../../config/constants.js';
 
 const adminSchema = new mongoose.Schema(
   {
@@ -16,7 +16,7 @@ const adminSchema = new mongoose.Schema(
       immutable: true,
       lowercase: true,
       validate: {
-        validator: email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+        validator: email => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/).test(email),
         message: 'بريد إلكتروني غير صالح'
       }
     },
@@ -36,11 +36,28 @@ const adminSchema = new mongoose.Schema(
       enum: ADMIN_ROLES,
       default: 'admin'
     },
+    // Multi-tenant fields
+    university: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'University',
+      required: [true, 'يجب تحديد الجامعة']
+    },
+    college: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'College',
+      required: [true, 'يجب تحديد الكلية']
+    },
+    employeeId: {
+      type: String,
+      required: [true, 'رقم الموظف مطلوب'],
+      unique: true,
+      immutable: true
+    },
     permissions: {
-      manageUsers: { type: Boolean, default: false },
-      manageContent: { type: Boolean, default: true },
-      generateReports: { type: Boolean, default: true },
-      systemSettings: { type: Boolean, default: false }
+      manageUsers: {type: Boolean, default: false},
+      manageContent: {type: Boolean, default: true},
+      generateReports: {type: Boolean, default: true},
+      systemSettings: {type: Boolean, default: false}
     },
     lastLogin: Date,
     isActive: {
@@ -50,8 +67,8 @@ const adminSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toJSON: {virtuals: true},
+    toObject: {virtuals: true}
   }
 );
 
@@ -68,5 +85,10 @@ adminSchema.pre('save', async function (next) {
 adminSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// Indexes
+adminSchema.index({university: 1});
+adminSchema.index({college: 1});
+adminSchema.index({isActive: 1});
 
 export const Admin = mongoose.model('Admin', adminSchema);

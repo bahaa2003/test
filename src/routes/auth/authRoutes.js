@@ -13,8 +13,8 @@ import {
   uploadAvatar,
   getProfileStats
 } from '../../controllers/auth/userController.js';
-import { authenticate } from '../../middlewares/auth/authenticate.js';
-import { validateLogin, validateUpdatePassword } from '../../middlewares/validations/authValidation.js';
+import {authenticate} from '../../middlewares/auth/authenticate.js';
+import {validateLogin, validateUpdatePassword} from '../../middlewares/validations/authValidation.js';
 
 const router = express.Router();
 

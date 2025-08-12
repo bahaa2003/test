@@ -12,14 +12,14 @@ export const generateExcel = async (data, type = 'daily') => {
 
   // أنماط الخلايا
   const headerStyle = {
-    font: { bold: true, color: { argb: 'FFFFFF' }, name: 'Arial', size: 12 },
-    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: '2F5496' } },
-    alignment: { vertical: 'middle', horizontal: 'center' },
-    border: { top: { style: 'thin' }, bottom: { style: 'thin' } }
+    font: {bold: true, color: {argb: 'FFFFFF'}, name: 'Arial', size: 12},
+    fill: {type: 'pattern', pattern: 'solid', fgColor: {argb: '2F5496'}},
+    alignment: {vertical: 'middle', horizontal: 'center'},
+    border: {top: {style: 'thin'}, bottom: {style: 'thin'}}
   };
 
   // توليد المحتوى حسب النوع
-  switch(type) {
+  switch (type) {
     case 'daily':
       generateDailyExcel(worksheet, data, headerStyle);
       break;
@@ -39,8 +39,8 @@ const generateDailyExcel = (worksheet, data, headerStyle) => {
   worksheet.mergeCells('A1:E1');
   worksheet.getCell('A1').value = 'التقرير اليومي للحضور';
   worksheet.getCell('A1').style = {
-    font: { bold: true, size: 16, name: 'Arial' },
-    alignment: { horizontal: 'center' }
+    font: {bold: true, size: 16, name: 'Arial'},
+    alignment: {horizontal: 'center'}
   };
 
   // بيانات التقرير
@@ -75,7 +75,7 @@ const generateDailyExcel = (worksheet, data, headerStyle) => {
 
   // ضبط عرض الأعمدة
   worksheet.columns = [
-    { width: 30 }, { width: 15 }, { width: 15 }, { width: 15 }
+    {width: 30}, {width: 15}, {width: 15}, {width: 15}
   ];
 };
 
@@ -84,8 +84,8 @@ const generateStudentExcel = (worksheet, data, headerStyle) => {
   worksheet.mergeCells('A1:E1');
   worksheet.getCell('A1').value = `تقرير الحضور للطالب: ${data.student.name}`;
   worksheet.getCell('A1').style = {
-    font: { bold: true, size: 16 },
-    alignment: { horizontal: 'center' }
+    font: {bold: true, size: 16},
+    alignment: {horizontal: 'center'}
   };
 
   // جدول المواد

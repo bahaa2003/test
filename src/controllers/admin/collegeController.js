@@ -1,10 +1,10 @@
-import { catchAsync } from '../../utils/catchError.js';
-import { College } from '../../models/academic/College.js';
-import { AppError } from '../../utils/AppError.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {College} from '../../models/academic/College.js';
+import {AppError} from '../../utils/AppError.js';
 
 // إنشاء كلية جديدة
 export const createCollege = catchAsync(async (req, res, next) => {
-  const { name, type, totalYears, hasDepartments } = req.body;
+  const {name, type, totalYears, hasDepartments} = req.body;
 
   const college = await College.create({
     name,
@@ -15,7 +15,7 @@ export const createCollege = catchAsync(async (req, res, next) => {
 
   res.status(201).json({
     status: 'success',
-    data: { college }
+    data: {college}
   });
 });
 
@@ -26,7 +26,7 @@ export const getAllColleges = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: colleges.length,
-    data: { colleges }
+    data: {colleges}
   });
 });
 
@@ -35,7 +35,7 @@ export const updateCollege = catchAsync(async (req, res, next) => {
   const college = await College.findByIdAndUpdate(
     req.params.id,
     req.body,
-    { new: true, runValidators: true }
+    {new: true, runValidators: true}
   );
 
   if (!college) {
@@ -44,7 +44,7 @@ export const updateCollege = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    data: { college }
+    data: {college}
   });
 });
 

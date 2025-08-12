@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import logger from '../src/utils/logger.js';
+import logger from '../utils/logger.js';
 import config from './config.js';
 
 /**
@@ -8,13 +8,7 @@ import config from './config.js';
 export const connectDB = async () => {
   try {
     const conn = await mongoose.connect(config.database.uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-      bufferCommands: false,
-      bufferMaxEntries: 0
+      ...config.database.options
     });
 
     logger.info(`MongoDB Connected: ${conn.connection.host}`);
@@ -24,7 +18,7 @@ export const connectDB = async () => {
       logger.info('Mongoose connected to MongoDB');
     });
 
-    mongoose.connection.on('error', (err) => {
+    mongoose.connection.on('error', err => {
       logger.error('Mongoose connection error:', err);
     });
 

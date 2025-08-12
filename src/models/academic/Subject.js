@@ -7,7 +7,7 @@ const subjectSchema = new mongoose.Schema({
     unique: true,
     uppercase: true,
     validate: {
-      validator: v => /^[A-Z]{2,4}[0-9]{3,4}$/.test(v),
+      validator: v => (/^[A-Z]{2,4}[0-9]{3,4}$/).test(v),
       message: 'كود المادة غير صالح (مثال: CS101 أو MATH1001)'
     }
   },
@@ -36,9 +36,9 @@ const subjectSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Program',
     validate: {
-      validator: async function(programs) {
+      validator: async function (programs) {
         const dept = await mongoose.model('Department').findById(this.department);
-        const deptPrograms = await mongoose.model('Program').find({ department: dept._id });
+        const deptPrograms = await mongoose.model('Program').find({department: dept._id});
         return programs.every(p => deptPrograms.some(dp => dp._id.equals(p)));
       },
       message: 'بعض البرامج المحددة لا تنتمي للقسم'
@@ -48,7 +48,7 @@ const subjectSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Subject',
     validate: {
-      validator: function(prereqs) {
+      validator: function (prereqs) {
         return !prereqs.includes(this._id);
       },
       message: 'المادة لا يمكن أن تكون متطلبة لنفسها'
@@ -59,9 +59,9 @@ const subjectSchema = new mongoose.Schema({
     ref: 'Subject'
   }],
   assessment: {
-    midterm: { type: Number, min: 0, max: 40 },
-    final: { type: Number, min: 0, max: 60 },
-    practical: { type: Number, min: 0, max: 30 }
+    midterm: {type: Number, min: 0, max: 40},
+    final: {type: Number, min: 0, max: 60},
+    practical: {type: Number, min: 0, max: 30}
   },
   isElective: {
     type: Boolean,
@@ -78,8 +78,8 @@ const subjectSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toJSON: {virtuals: true},
+  toObject: {virtuals: true}
 });
 
 // Virtuals
@@ -90,7 +90,7 @@ subjectSchema.virtual('schedules', {
 });
 
 // Middleware للتحقق من التكاملية
-subjectSchema.pre('save', async function(next) {
+subjectSchema.pre('save', async function (next) {
   // التحقق من أن المادة ليست متطلب سابق لنفسها
   if (this.prerequisites.includes(this._id)) {
     throw new Error('المادة لا يمكن أن تكون متطلبة لنفسها');
@@ -99,7 +99,7 @@ subjectSchema.pre('save', async function(next) {
 });
 
 // Indexes
-subjectSchema.index({ code: 1 }, { unique: true });
-subjectSchema.index({ department: 1, name: 1 });
+
+subjectSchema.index({department: 1, name: 1});
 
 export const Subject = mongoose.model('Subject', subjectSchema);

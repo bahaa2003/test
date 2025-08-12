@@ -1,9 +1,9 @@
-import { Schedule } from '../../models/academic/Schedule.js';
-import { Subject } from '../../models/academic/Subject.js';
-import { Faculty } from '../../models/user/Faculty.js';
-import { catchAsync } from '../../utils/catchAsync.js';
-import { AppError } from '../../utils/AppError.js';
-import { ApiFeatures } from '../../utils/ApiFeatures.js';
+import {Schedule} from '../../models/academic/Schedule.js';
+import {Subject} from '../../models/academic/Subject.js';
+import {Faculty} from '../../models/user/Faculty.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {AppError} from '../../utils/AppError.js';
+import {ApiFeatures} from '../../utils/ApiFeatures.js';
 
 /**
  * @desc    إنشاء جدول جديد
@@ -24,7 +24,7 @@ export const createSchedule = catchAsync(async (req, res, next) => {
   }
 
   const schedule = await Schedule.create(req.body);
-  res.status(201).json({ status: 'success', data: { schedule } });
+  res.status(201).json({status: 'success', data: {schedule}});
 });
 
 /**
@@ -51,7 +51,7 @@ export const getAllSchedules = catchAsync(async (req, res, next) => {
     status: 'success',
     results: schedules.length,
     total,
-    data: { schedules }
+    data: {schedules}
   });
 });
 
@@ -69,7 +69,7 @@ export const getScheduleById = catchAsync(async (req, res, next) => {
     return next(new AppError('الجدول غير موجود', 404));
   }
 
-  res.status(200).json({ status: 'success', data: { schedule } });
+  res.status(200).json({status: 'success', data: {schedule}});
 });
 
 /**
@@ -105,7 +105,7 @@ export const updateSchedule = catchAsync(async (req, res, next) => {
     return next(new AppError('الجدول غير موجود', 404));
   }
 
-  res.status(200).json({ status: 'success', data: { schedule } });
+  res.status(200).json({status: 'success', data: {schedule}});
 });
 
 /**
@@ -120,7 +120,7 @@ export const deleteSchedule = catchAsync(async (req, res, next) => {
     return next(new AppError('الجدول غير موجود', 404));
   }
 
-  res.status(204).json({ status: 'success', data: null });
+  res.status(204).json({status: 'success', data: null});
 });
 
 /**
@@ -139,7 +139,7 @@ export const getSchedulesBySubject = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: schedules.length,
-    data: { schedules }
+    data: {schedules}
   });
 });
 
@@ -159,7 +159,7 @@ export const getSchedulesByFaculty = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: schedules.length,
-    data: { schedules }
+    data: {schedules}
   });
 });
 
@@ -169,7 +169,7 @@ export const getSchedulesByFaculty = catchAsync(async (req, res, next) => {
  * @access  public
  */
 export const getActiveSchedules = catchAsync(async (req, res, next) => {
-  const schedules = await Schedule.find({ isActive: true })
+  const schedules = await Schedule.find({isActive: true})
     .populate('subjectId', 'name code')
     .populate('facultyId', 'name email')
     .select('dayOfWeek startTime endTime room subjectId facultyId');
@@ -177,7 +177,7 @@ export const getActiveSchedules = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: schedules.length,
-    data: { schedules }
+    data: {schedules}
   });
 });
 
@@ -187,7 +187,7 @@ export const getActiveSchedules = catchAsync(async (req, res, next) => {
  * @access  public
  */
 export const getSchedulesByDay = catchAsync(async (req, res, next) => {
-  const { dayOfWeek } = req.params;
+  const {dayOfWeek} = req.params;
   const validDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
   if (!validDays.includes(dayOfWeek.toLowerCase())) {
@@ -205,6 +205,6 @@ export const getSchedulesByDay = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: schedules.length,
-    data: { schedules }
+    data: {schedules}
   });
 });

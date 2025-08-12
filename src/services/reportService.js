@@ -1,11 +1,11 @@
-import { Attendance } from '../models/operational/Attendance.js';
-import { Student } from '../models/user/Student.js';
-import { Subject } from '../models/academic/Subject.js';
-import { Faculty } from '../models/user/Faculty.js';
-import { DailyReport } from '../models/report/DailyReport.js';
-import { SemesterReport } from '../models/report/SemesterReport.js';
-import { StudentReport } from '../models/report/StudentReport.js';
-import { AppError } from '../utils/AppError.js';
+import {Attendance} from '../models/operational/Attendance.js';
+import {Student} from '../models/user/Student.js';
+import {Subject} from '../models/academic/Subject.js';
+import {Faculty} from '../models/user/Faculty.js';
+import {DailyReport} from '../models/report/DailyReport.js';
+import {SemesterReport} from '../models/report/SemesterReport.js';
+import {StudentReport} from '../models/report/StudentReport.js';
+import {AppError} from '../utils/AppError.js';
 import logger from '../utils/logger.js';
 import moment from 'moment-timezone';
 
@@ -16,7 +16,7 @@ class ReportService {
   /**
    * إنشاء تقرير يومي
    */
-  async generateDailyReport(date = new Date()) {
+  async generateDailyReport (date = new Date()) {
     try {
       const startOfDay = moment(date).startOf('day');
       const endOfDay = moment(date).endOf('day');
@@ -34,7 +34,7 @@ class ReportService {
         {
           $group: {
             _id: '$status',
-            count: { $sum: 1 }
+            count: {$sum: 1}
           }
         }
       ]);
@@ -63,16 +63,16 @@ class ReportService {
         {
           $group: {
             _id: '$subjectId',
-            subjectName: { $first: '$subject.name' },
-            totalStudents: { $sum: 1 },
+            subjectName: {$first: '$subject.name'},
+            totalStudents: {$sum: 1},
             present: {
-              $sum: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] }
+              $sum: {$cond: [{$eq: ['$status', 'present']}, 1, 0]}
             },
             absent: {
-              $sum: { $cond: [{ $eq: ['$status', 'absent'] }, 1, 0] }
+              $sum: {$cond: [{$eq: ['$status', 'absent']}, 1, 0]}
             },
             late: {
-              $sum: { $cond: [{ $eq: ['$status', 'late'] }, 1, 0] }
+              $sum: {$cond: [{$eq: ['$status', 'late']}, 1, 0]}
             }
           }
         }
@@ -88,9 +88,9 @@ class ReportService {
       };
 
       const dailyReport = await DailyReport.findOneAndUpdate(
-        { date: startOfDay.toDate() },
+        {date: startOfDay.toDate()},
         reportData,
-        { new: true, upsert: true }
+        {new: true, upsert: true}
       );
 
       logger.info(`Daily report generated for ${startOfDay.format('YYYY-MM-DD')}`);
@@ -104,7 +104,7 @@ class ReportService {
   /**
    * إنشاء تقرير فصل دراسي
    */
-  async generateSemesterReport(semesterId, academicYear) {
+  async generateSemesterReport (semesterId, academicYear) {
     try {
       const startDate = moment(academicYear).startOf('year');
       const endDate = moment(academicYear).endOf('year');
@@ -149,22 +149,22 @@ class ReportService {
               studentId: '$studentId',
               studentName: '$student.name'
             },
-            totalSessions: { $sum: 1 },
+            totalSessions: {$sum: 1},
             present: {
-              $sum: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] }
+              $sum: {$cond: [{$eq: ['$status', 'present']}, 1, 0]}
             },
             absent: {
-              $sum: { $cond: [{ $eq: ['$status', 'absent'] }, 1, 0] }
+              $sum: {$cond: [{$eq: ['$status', 'absent']}, 1, 0]}
             },
             late: {
-              $sum: { $cond: [{ $eq: ['$status', 'late'] }, 1, 0] }
+              $sum: {$cond: [{$eq: ['$status', 'late']}, 1, 0]}
             }
           }
         },
         {
           $group: {
             _id: '$_id.subjectId',
-            subjectName: { $first: '$_id.subjectName' },
+            subjectName: {$first: '$_id.subjectName'},
             students: {
               $push: {
                 studentId: '$_id.studentId',
@@ -175,7 +175,7 @@ class ReportService {
                 late: '$late',
                 attendanceRate: {
                   $multiply: [
-                    { $divide: ['$present', '$totalSessions'] },
+                    {$divide: ['$present', '$totalSessions']},
                     100
                   ]
                 }
@@ -195,9 +195,9 @@ class ReportService {
       };
 
       const semesterReport = await SemesterReport.findOneAndUpdate(
-        { semesterId, academicYear },
+        {semesterId, academicYear},
         reportData,
-        { new: true, upsert: true }
+        {new: true, upsert: true}
       );
 
       logger.info(`Semester report generated for semester ${semesterId}, year ${academicYear}`);
@@ -211,7 +211,7 @@ class ReportService {
   /**
    * إنشاء تقرير طالب
    */
-  async generateStudentReport(studentId, startDate, endDate) {
+  async generateStudentReport (studentId, startDate, endDate) {
     try {
       const student = await Student.findById(studentId);
       if (!student) {
@@ -242,16 +242,16 @@ class ReportService {
         {
           $group: {
             _id: '$subjectId',
-            subjectName: { $first: '$subject.name' },
-            totalSessions: { $sum: 1 },
+            subjectName: {$first: '$subject.name'},
+            totalSessions: {$sum: 1},
             present: {
-              $sum: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] }
+              $sum: {$cond: [{$eq: ['$status', 'present']}, 1, 0]}
             },
             absent: {
-              $sum: { $cond: [{ $eq: ['$status', 'absent'] }, 1, 0] }
+              $sum: {$cond: [{$eq: ['$status', 'absent']}, 1, 0]}
             },
             late: {
-              $sum: { $cond: [{ $eq: ['$status', 'late'] }, 1, 0] }
+              $sum: {$cond: [{$eq: ['$status', 'late']}, 1, 0]}
             }
           }
         },
@@ -259,7 +259,7 @@ class ReportService {
           $addFields: {
             attendanceRate: {
               $multiply: [
-                { $divide: ['$present', '$totalSessions'] },
+                {$divide: ['$present', '$totalSessions']},
                 100
               ]
             }
@@ -287,7 +287,7 @@ class ReportService {
           endDate: new Date(endDate)
         },
         reportData,
-        { new: true, upsert: true }
+        {new: true, upsert: true}
       );
 
       logger.info(`Student report generated for ${student.name} (${studentId})`);
@@ -301,7 +301,7 @@ class ReportService {
   /**
    * الحصول على تقرير مدرس
    */
-  async generateFacultyReport(facultyId, startDate, endDate) {
+  async generateFacultyReport (facultyId, startDate, endDate) {
     try {
       const faculty = await Faculty.findById(facultyId);
       if (!faculty) {
@@ -309,13 +309,13 @@ class ReportService {
       }
 
       // الحصول على المواد التي يدرسها المدرس
-      const subjects = await Subject.find({ facultyId: faculty._id });
+      const subjects = await Subject.find({facultyId: faculty._id});
       const subjectIds = subjects.map(subject => subject._id);
 
       const attendanceData = await Attendance.aggregate([
         {
           $match: {
-            subjectId: { $in: subjectIds },
+            subjectId: {$in: subjectIds},
             date: {
               $gte: new Date(startDate),
               $lte: new Date(endDate)
@@ -336,16 +336,16 @@ class ReportService {
         {
           $group: {
             _id: '$subjectId',
-            subjectName: { $first: '$subject.name' },
-            totalSessions: { $sum: 1 },
+            subjectName: {$first: '$subject.name'},
+            totalSessions: {$sum: 1},
             present: {
-              $sum: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] }
+              $sum: {$cond: [{$eq: ['$status', 'present']}, 1, 0]}
             },
             absent: {
-              $sum: { $cond: [{ $eq: ['$status', 'absent'] }, 1, 0] }
+              $sum: {$cond: [{$eq: ['$status', 'absent']}, 1, 0]}
             },
             late: {
-              $sum: { $cond: [{ $eq: ['$status', 'late'] }, 1, 0] }
+              $sum: {$cond: [{$eq: ['$status', 'late']}, 1, 0]}
             }
           }
         },
@@ -353,7 +353,7 @@ class ReportService {
           $addFields: {
             attendanceRate: {
               $multiply: [
-                { $divide: ['$present', '$totalSessions'] },
+                {$divide: ['$present', '$totalSessions']},
                 100
               ]
             }

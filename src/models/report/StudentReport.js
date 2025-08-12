@@ -57,24 +57,24 @@ const studentReportSchema = new mongoose.Schema({
   lastUpdated: Date
 }, {
   timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toJSON: {virtuals: true},
+  toObject: {virtuals: true}
 });
 
 // Indexes
-studentReportSchema.index({ student: 1, academicYear: 1, semester: 1 }, { unique: true });
-studentReportSchema.index({ 'attendanceDetails.subject': 1 });
+studentReportSchema.index({student: 1, academicYear: 1, semester: 1}, {unique: true});
+studentReportSchema.index({'attendanceDetails.subject': 1});
 
 // Virtual for student status
-studentReportSchema.virtual('status').get(function() {
-  if (this.overallStats.attendanceRate >= 90) return 'ممتاز';
-  if (this.overallStats.attendanceRate >= 75) return 'جيد جداً';
-  if (this.overallStats.attendanceRate >= 60) return 'مقبول';
+studentReportSchema.virtual('status').get(function () {
+  if (this.overallStats.attendanceRate >= 90) { return 'ممتاز'; }
+  if (this.overallStats.attendanceRate >= 75) { return 'جيد جداً'; }
+  if (this.overallStats.attendanceRate >= 60) { return 'مقبول'; }
   return 'تحت الإنذار';
 });
 
 // Middleware to update lastUpdated
-studentReportSchema.pre('save', function(next) {
+studentReportSchema.pre('save', function (next) {
   this.lastUpdated = new Date();
   next();
 });

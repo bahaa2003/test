@@ -4,8 +4,8 @@
  */
 
 import app from './app.js';
-import config from '../config/config.js';
-import { connectDB } from '../config/db.js';
+import config from './config/config.js';
+import {connectDB} from './config/db.js';
 import logger from './utils/logger.js';
 
 /**
@@ -37,7 +37,6 @@ const startServer = async () => {
         process.exit(0);
       });
     });
-
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

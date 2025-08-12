@@ -1,11 +1,11 @@
-import { AppError } from '../utils/AppError.js';
+import {AppError} from '../utils/AppError.js';
 import logger from '../utils/logger.js';
 
 /**
  * معالج الأخطاء العام
  */
 export const errorHandler = (err, req, res, next) => {
-  let error = { ...err };
+  let error = {...err};
   error.message = err.message;
 
   // تسجيل الخطأ
@@ -33,7 +33,8 @@ export const errorHandler = (err, req, res, next) => {
 
   // خطأ في Mongoose - خطأ في التحقق من صحة البيانات
   if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors).map(val => val.message).join(', ');
+    const message = Object.values(err.errors).map(val => val.message)
+      .join(', ');
     error = new AppError(message, 400);
   }
 
@@ -88,7 +89,7 @@ export const errorHandler = (err, req, res, next) => {
   res.status(error.statusCode || 500).json({
     status: 'error',
     message: error.message || 'خطأ داخلي في الخادم',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(process.env.NODE_ENV === 'development' && {stack: err.stack})
   });
 };
 

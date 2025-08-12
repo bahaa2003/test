@@ -1,11 +1,11 @@
-import helmet from "helmet";
-import mongoSanitize from "express-mongo-sanitize";
-import xss from "xss-clean";
-import rateLimit from "express-rate-limit";
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
+import xss from 'xss-clean';
+import rateLimit from 'express-rate-limit';
 
 export const securityMiddleware = (app) => {
   app.use(helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: false
   }));
 
   app.use(mongoSanitize());
@@ -15,8 +15,8 @@ export const securityMiddleware = (app) => {
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
-    message: "لقد قمت بعدد كبير من الطلبات، حاول مرة أخرى لاحقًا!",
+    message: 'لقد قمت بعدد كبير من الطلبات، حاول مرة أخرى لاحقًا!'
   });
 
-  app.use("/api", limiter);
+  app.use('/api', limiter);
 };

@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken';
-import { Admin } from '../../models/user/Admin.js';
-import { Faculty } from '../../models/user/Faculty.js';
-import { Student } from '../../models/user/Student.js';
-import { catchAsync } from '../../utils/catchAsync.js';
-import { AppError } from '../../utils/AppError.js';
-import { signToken } from '../../utils/auth/signToken.js';
-import { setTokenCookie } from '../../utils/auth/setTokenCookie.js';
+import {Admin} from '../../models/user/Admin.js';
+import {Faculty} from '../../models/user/Faculty.js';
+import {Student} from '../../models/user/Student.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {AppError} from '../../utils/AppError.js';
+import {signToken} from '../../utils/auth/signToken.js';
+import {setTokenCookie} from '../../utils/auth/setTokenCookie.js';
 
 /**
  * @desc    تسجيل الدخول
@@ -13,7 +13,7 @@ import { setTokenCookie } from '../../utils/auth/setTokenCookie.js';
  * @access  public
  */
 export const login = catchAsync(async (req, res, next) => {
-  const { email, password, role } = req.body;
+  const {email, password, role} = req.body;
 
   // التحقق من وجود البريد الإلكتروني وكلمة المرور
   if (!email || !password) {
@@ -37,8 +37,8 @@ export const login = catchAsync(async (req, res, next) => {
   }
 
   // البحث عن المستخدم
-  const user = await UserModel.findOne({ email }).select('+password');
-  if (!user || !(await user.correctPassword(password, user.password))) {
+  const user = await UserModel.findOne({email}).select('+password');
+  if (!user || !(await user.comparePassword(password))) {
     return next(new AppError('البريد الإلكتروني أو كلمة المرور غير صحيحة', 401));
   }
 
@@ -80,7 +80,7 @@ export const login = catchAsync(async (req, res, next) => {
  * @access  private
  */
 export const logout = catchAsync(async (req, res, next) => {
-  const { role } = req.user;
+  const {role} = req.user;
 
   // تحديد النموذج حسب الدور
   let UserModel;
@@ -119,8 +119,8 @@ export const logout = catchAsync(async (req, res, next) => {
  * @access  private
  */
 export const updatePassword = catchAsync(async (req, res, next) => {
-  const { currentPassword, newPassword } = req.body;
-  const { role } = req.user;
+  const {currentPassword, newPassword} = req.body;
+  const {role} = req.user;
 
   // التحقق من وجود كلمات المرور
   if (!currentPassword || !newPassword) {
@@ -150,7 +150,7 @@ export const updatePassword = catchAsync(async (req, res, next) => {
   }
 
   // التحقق من كلمة المرور الحالية
-  if (!(await user.correctPassword(currentPassword, user.password))) {
+  if (!(await user.comparePassword(currentPassword))) {
     return next(new AppError('كلمة المرور الحالية غير صحيحة', 401));
   }
 
@@ -164,7 +164,7 @@ export const updatePassword = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     message: 'تم تحديث كلمة المرور بنجاح',
-    data: { user }
+    data: {user}
   });
 });
 
@@ -174,7 +174,7 @@ export const updatePassword = catchAsync(async (req, res, next) => {
  * @access  public
  */
 export const refreshToken = catchAsync(async (req, res, next) => {
-  const { refreshToken } = req.cookies || req.body;
+  const {refreshToken} = req.cookies || req.body;
 
   if (!refreshToken) {
     return next(new AppError('توكن التحديث مطلوب', 401));
@@ -190,16 +190,16 @@ export const refreshToken = catchAsync(async (req, res, next) => {
 
     // محاولة العثور على المستخدم في جميع النماذج
     user = await Admin.findById(decoded.id);
-    if (user) UserModel = Admin;
+    if (user) { UserModel = Admin; }
 
     if (!user) {
       user = await Faculty.findById(decoded.id);
-      if (user) UserModel = Faculty;
+      if (user) { UserModel = Faculty; }
     }
 
     if (!user) {
       user = await Student.findById(decoded.id);
-      if (user) UserModel = Student;
+      if (user) { UserModel = Student; }
     }
 
     if (!user || user.refreshToken !== refreshToken) {
@@ -231,7 +231,6 @@ export const refreshToken = catchAsync(async (req, res, next) => {
         refreshToken: newRefreshToken
       }
     });
-
   } catch (error) {
     return next(new AppError('توكن التحديث غير صالح', 401));
   }
@@ -243,7 +242,7 @@ export const refreshToken = catchAsync(async (req, res, next) => {
  * @access  private
  */
 export const getMe = catchAsync(async (req, res, next) => {
-  const { role } = req.user;
+  const {role} = req.user;
 
   // تحديد النموذج حسب الدور
   let UserModel;
@@ -269,6 +268,6 @@ export const getMe = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    data: { user }
+    data: {user}
   });
 });

@@ -1,5 +1,5 @@
 // utils/dbBackup.js
-import { exec } from 'child_process';
+import {exec} from 'child_process';
 import moment from 'moment';
 import path from 'path';
 

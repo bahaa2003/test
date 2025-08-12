@@ -83,8 +83,10 @@ export const bulkAttendanceSchema = Joi.object({
   attendances: Joi.array()
     .items(Joi.object({
       studentId: Joi.string().required(),
-      status: Joi.string().valid('present', 'absent', 'late', 'excused').default('present'),
-      notes: Joi.string().max(500).optional()
+      status: Joi.string().valid('present', 'absent', 'late', 'excused')
+        .default('present'),
+      notes: Joi.string().max(500)
+        .optional()
     }))
     .min(1)
     .required()
@@ -164,7 +166,7 @@ export const nfcDeviceSchema = Joi.object({
  * middleware للتحقق من صحة بيانات الحضور
  */
 export const validateAttendance = (req, res, next) => {
-  const { error } = attendanceSchema.validate(req.body);
+  const {error} = attendanceSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
       status: 'error',
@@ -178,7 +180,7 @@ export const validateAttendance = (req, res, next) => {
  * middleware للتحقق من صحة بيانات تحديث الحضور
  */
 export const validateUpdateAttendance = (req, res, next) => {
-  const { error } = updateAttendanceSchema.validate(req.body);
+  const {error} = updateAttendanceSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
       status: 'error',
@@ -192,7 +194,7 @@ export const validateUpdateAttendance = (req, res, next) => {
  * middleware للتحقق من صحة بيانات الحضور بالجملة
  */
 export const validateBulkAttendance = (req, res, next) => {
-  const { error } = bulkAttendanceSchema.validate(req.body);
+  const {error} = bulkAttendanceSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
       status: 'error',
@@ -206,7 +208,7 @@ export const validateBulkAttendance = (req, res, next) => {
  * middleware للتحقق من صحة بيانات الفترة الزمنية
  */
 export const validateTimeSlot = (req, res, next) => {
-  const { error } = timeSlotSchema.validate(req.body);
+  const {error} = timeSlotSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
       status: 'error',
@@ -220,7 +222,7 @@ export const validateTimeSlot = (req, res, next) => {
  * middleware للتحقق من صحة بيانات جهاز NFC
  */
 export const validateNfcDevice = (req, res, next) => {
-  const { error } = nfcDeviceSchema.validate(req.body);
+  const {error} = nfcDeviceSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
       status: 'error',

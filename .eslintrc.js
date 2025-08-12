@@ -12,11 +12,11 @@ export default {
     sourceType: 'module'
   },
   rules: {
-    'indent': ['error', 2],
-    'linebreak-style': ['error', 'unix'],
-    'quotes': ['error', 'single'],
-    'semi': ['error', 'always'],
-    'no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
+    indent: ['error', 2],
+    'linebreak-style': 'off', // Disable linebreak-style rule for Windows compatibility
+    quotes: ['error', 'single'],
+    semi: ['error', 'always'],
+    'no-unused-vars': ['error', {argsIgnorePattern: '^_'}],
     'no-console': 'warn',
     'prefer-const': 'error',
     'no-var': 'error',
@@ -30,7 +30,7 @@ export default {
     'comma-dangle': ['error', 'never'],
     'no-trailing-spaces': 'error',
     'eol-last': 'error',
-    'no-multiple-empty-lines': ['error', { 'max': 1 }],
+    'no-multiple-empty-lines': ['error', {max: 1}],
     'space-before-function-paren': ['error', 'always'],
     'space-before-blocks': 'error',
     'keyword-spacing': 'error',
@@ -38,12 +38,16 @@ export default {
     'comma-spacing': 'error',
     'object-curly-spacing': ['error', 'always'],
     'array-bracket-spacing': ['error', 'never'],
-    'computed-property-spacing': ['error', 'never']
+    'computed-property-spacing': ['error', 'never'],
+    'import/no-unresolved': 'error',
+    'import/extensions': ['error', 'ignorePackages', {js: 'always'}]
   },
   ignorePatterns: [
     'node_modules/',
     'coverage/',
     'logs/',
-    '*.min.js'
+    '*.min.js',
+    'dist/',
+    'build/'
   ]
 };

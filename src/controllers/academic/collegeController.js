@@ -1,7 +1,7 @@
-import { College } from '../../models/academic/College.js';
-import { catchAsync } from '../../utils/catchAsync.js';
-import { AppError } from '../../utils/AppError.js';
-import { ApiFeatures } from '../../utils/ApiFeatures.js';
+import {College} from '../../models/academic/College.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {AppError} from '../../utils/AppError.js';
+import {ApiFeatures} from '../../utils/ApiFeatures.js';
 
 /**
  * @desc    إنشاء كلية جديدة
@@ -10,7 +10,7 @@ import { ApiFeatures } from '../../utils/ApiFeatures.js';
  */
 export const createCollege = catchAsync(async (req, res, next) => {
   const college = await College.create(req.body);
-  res.status(201).json({ status: 'success', data: { college } });
+  res.status(201).json({status: 'success', data: {college}});
 });
 
 /**
@@ -32,7 +32,7 @@ export const getAllColleges = catchAsync(async (req, res, next) => {
     status: 'success',
     results: colleges.length,
     total,
-    data: { colleges }
+    data: {colleges}
   });
 });
 
@@ -48,7 +48,7 @@ export const getCollegeById = catchAsync(async (req, res, next) => {
     return next(new AppError('الكلية غير موجودة', 404));
   }
 
-  res.status(200).json({ status: 'success', data: { college } });
+  res.status(200).json({status: 'success', data: {college}});
 });
 
 /**
@@ -66,7 +66,7 @@ export const updateCollege = catchAsync(async (req, res, next) => {
     return next(new AppError('الكلية غير موجودة', 404));
   }
 
-  res.status(200).json({ status: 'success', data: { college } });
+  res.status(200).json({status: 'success', data: {college}});
 });
 
 /**
@@ -81,7 +81,7 @@ export const deleteCollege = catchAsync(async (req, res, next) => {
     return next(new AppError('الكلية غير موجودة', 404));
   }
 
-  res.status(204).json({ status: 'success', data: null });
+  res.status(204).json({status: 'success', data: null});
 });
 
 /**
@@ -90,11 +90,11 @@ export const deleteCollege = catchAsync(async (req, res, next) => {
  * @access  public
  */
 export const getActiveColleges = catchAsync(async (req, res, next) => {
-  const colleges = await College.find({ isActive: true }).select('name code');
+  const colleges = await College.find({isActive: true}).select('name code');
 
   res.status(200).json({
     status: 'success',
     results: colleges.length,
-    data: { colleges }
+    data: {colleges}
   });
 });

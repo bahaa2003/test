@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
-import { Admin } from '../../models/user/Admin.js';
-import { Faculty } from '../../models/user/Faculty.js';
-import { Student } from '../../models/user/Student.js';
-import { AppError } from '../../utils/AppError.js';
-import { catchAsync } from '../../utils/catchAsync.js';
-import config from '../../../config/config.js';
+import {Admin} from '../../models/user/Admin.js';
+import {Faculty} from '../../models/user/Faculty.js';
+import {Student} from '../../models/user/Student.js';
+import {AppError} from '../../utils/AppError.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import config from '../../config/config.js';
 
 /**
  * middleware للمصادقة باستخدام JWT
@@ -67,7 +67,6 @@ export const authenticate = catchAsync(async (req, res, next) => {
     // إضافة المستخدم للطلب
     req.user = user;
     next();
-
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
       return next(new AppError('توكن غير صالح', 401));

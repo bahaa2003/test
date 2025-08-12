@@ -1,10 +1,10 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import {exec} from 'child_process';
+import {promisify} from 'util';
 import fs from 'fs/promises';
 import path from 'path';
-import { AppError } from '../utils/AppError.js';
+import {AppError} from '../utils/AppError.js';
 import logger from '../utils/logger.js';
-import config from '../../config/config.js';
+import config from '../config/config.js';
 
 const execAsync = promisify(exec);
 
@@ -12,7 +12,7 @@ const execAsync = promisify(exec);
  * خدمة النسخ الاحتياطي لقاعدة البيانات
  */
 class BackupService {
-  constructor() {
+  constructor () {
     this.backupDir = path.join(process.cwd(), 'backups');
     this.ensureBackupDirectory();
   }
@@ -20,11 +20,11 @@ class BackupService {
   /**
    * التأكد من وجود مجلد النسخ الاحتياطي
    */
-  async ensureBackupDirectory() {
+  async ensureBackupDirectory () {
     try {
       await fs.access(this.backupDir);
     } catch (error) {
-      await fs.mkdir(this.backupDir, { recursive: true });
+      await fs.mkdir(this.backupDir, {recursive: true});
       logger.info('Backup directory created');
     }
   }
@@ -32,22 +32,24 @@ class BackupService {
   /**
    * إنشاء نسخة احتياطية من قاعدة البيانات
    */
-  async createBackup(backupName = null) {
+  async createBackup (backupName = null) {
     try {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const timestamp = new Date().toISOString()
+        .replace(/[:.]/g, '-');
       const backupFileName = backupName || `backup-${timestamp}`;
       const backupPath = path.join(this.backupDir, `${backupFileName}.gz`);
 
       // استخراج معلومات الاتصال من URI
       const dbUri = config.database.uri;
-      const dbName = dbUri.split('/').pop().split('?')[0];
+      const dbName = dbUri.split('/').pop()
+        .split('?')[0];
 
       // أمر النسخ الاحتياطي
       const backupCommand = `mongodump --uri="${dbUri}" --archive="${backupPath}" --gzip`;
 
       logger.info(`Starting database backup: ${backupFileName}`);
 
-      const { stdout, stderr } = await execAsync(backupCommand);
+      const {stdout, stderr} = await execAsync(backupCommand);
 
       if (stderr) {
         logger.warn('Backup stderr:', stderr);
@@ -75,7 +77,7 @@ class BackupService {
   /**
    * استعادة قاعدة البيانات من نسخة احتياطية
    */
-  async restoreBackup(backupFileName) {
+  async restoreBackup (backupFileName) {
     try {
       const backupPath = path.join(this.backupDir, backupFileName);
 
@@ -89,7 +91,7 @@ class BackupService {
       // أمر الاستعادة
       const restoreCommand = `mongorestore --uri="${dbUri}" --archive="${backupPath}" --gzip --drop`;
 
-      const { stdout, stderr } = await execAsync(restoreCommand);
+      const {stdout, stderr} = await execAsync(restoreCommand);
 
       if (stderr) {
         logger.warn('Restore stderr:', stderr);
@@ -111,7 +113,7 @@ class BackupService {
   /**
    * الحصول على قائمة النسخ الاحتياطية
    */
-  async listBackups() {
+  async listBackups () {
     try {
       const files = await fs.readdir(this.backupDir);
       const backupFiles = files.filter(file => file.endsWith('.gz'));
@@ -144,7 +146,7 @@ class BackupService {
   /**
    * حذف نسخة احتياطية
    */
-  async deleteBackup(backupFileName) {
+  async deleteBackup (backupFileName) {
     try {
       const backupPath = path.join(this.backupDir, backupFileName);
 
@@ -169,15 +171,13 @@ class BackupService {
   /**
    * تنظيف النسخ الاحتياطية القديمة
    */
-  async cleanupOldBackups(retentionDays = 30) {
+  async cleanupOldBackups (retentionDays = 30) {
     try {
       const backups = await this.listBackups();
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
-      const oldBackups = backups.filter(backup =>
-        backup.createdAt < cutoffDate
-      );
+      const oldBackups = backups.filter(backup => backup.createdAt < cutoffDate);
 
       const deletedBackups = [];
 
@@ -206,7 +206,7 @@ class BackupService {
   /**
    * التحقق من صحة النسخة الاحتياطية
    */
-  async validateBackup(backupFileName) {
+  async validateBackup (backupFileName) {
     try {
       const backupPath = path.join(this.backupDir, backupFileName);
 
@@ -215,9 +215,10 @@ class BackupService {
 
       // التحقق من حجم الملف
       const stats = await fs.stat(backupPath);
-      const fileSizeInMB = (stats.size / (1024 * 1024));
+      const fileSizeInMB = stats.size / (1024 * 1024);
 
-      if (fileSizeInMB < 0.1) { // أقل من 100KB
+      if (fileSizeInMB < 0.1) {
+        // أقل من 100KB
         throw new AppError('النسخة الاحتياطية صغيرة جداً وقد تكون تالفة', 400);
       }
 

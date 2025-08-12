@@ -1,13 +1,13 @@
 import cron from 'node-cron';
 import backupService from '../services/backupService.js';
 import logger from '../utils/logger.js';
-import config from '../../config/config.js';
+import config from '../config/config.js';
 
 /**
  * وظيفة النسخ الاحتياطي التلقائي
  */
 class BackupJob {
-  constructor() {
+  constructor () {
     this.isRunning = false;
     this.lastBackup = null;
     this.backupSchedule = null;
@@ -16,23 +16,31 @@ class BackupJob {
   /**
    * بدء وظيفة النسخ الاحتياطي التلقائي
    */
-  start() {
+  start () {
     try {
       // جدولة النسخ الاحتياطي اليومي في الساعة 2 صباحاً
-      this.backupSchedule = cron.schedule('0 2 * * *', async () => {
-        await this.performDailyBackup();
-      }, {
-        scheduled: true,
-        timezone: 'Asia/Riyadh' // توقيت السعودية
-      });
+      this.backupSchedule = cron.schedule(
+        '0 2 * * *',
+        async () => {
+          await this.performDailyBackup();
+        },
+        {
+          scheduled: true,
+          timezone: 'Asia/Riyadh' // توقيت السعودية
+        }
+      );
 
       // جدولة تنظيف النسخ الاحتياطية القديمة كل أسبوع
-      cron.schedule('0 3 * * 0', async () => {
-        await this.performCleanup();
-      }, {
-        scheduled: true,
-        timezone: 'Asia/Riyadh'
-      });
+      cron.schedule(
+        '0 3 * * 0',
+        async () => {
+          await this.performCleanup();
+        },
+        {
+          scheduled: true,
+          timezone: 'Asia/Riyadh'
+        }
+      );
 
       logger.info('Backup jobs started successfully');
     } catch (error) {
@@ -43,7 +51,7 @@ class BackupJob {
   /**
    * إيقاف وظيفة النسخ الاحتياطي
    */
-  stop() {
+  stop () {
     if (this.backupSchedule) {
       this.backupSchedule.stop();
       logger.info('Backup jobs stopped');
@@ -53,7 +61,7 @@ class BackupJob {
   /**
    * تنفيذ النسخ الاحتياطي اليومي
    */
-  async performDailyBackup() {
+  async performDailyBackup () {
     if (this.isRunning) {
       logger.warn('Backup job is already running, skipping...');
       return;
@@ -64,7 +72,8 @@ class BackupJob {
     try {
       logger.info('Starting daily backup job...');
 
-      const timestamp = new Date().toISOString().split('T')[0];
+      const timestamp = new Date().toISOString()
+        .split('T')[0];
       const backupName = `daily-backup-${timestamp}`;
 
       const result = await backupService.createBackup(backupName);
@@ -79,7 +88,6 @@ class BackupJob {
 
       // التحقق من صحة النسخة الاحتياطية
       await backupService.validateBackup(`${backupName}.gz`);
-
     } catch (error) {
       logger.error('Daily backup job failed:', error);
 
@@ -93,7 +101,7 @@ class BackupJob {
   /**
    * تنفيذ تنظيف النسخ الاحتياطية القديمة
    */
-  async performCleanup() {
+  async performCleanup () {
     try {
       logger.info('Starting backup cleanup job...');
 
@@ -101,7 +109,6 @@ class BackupJob {
       const result = await backupService.cleanupOldBackups(retentionDays);
 
       logger.info(`Backup cleanup completed: ${result.deletedCount} files deleted`);
-
     } catch (error) {
       logger.error('Backup cleanup job failed:', error);
     }
@@ -110,7 +117,7 @@ class BackupJob {
   /**
    * تنفيذ نسخة احتياطية فورية
    */
-  async performImmediateBackup(backupName = null) {
+  async performImmediateBackup (backupName = null) {
     if (this.isRunning) {
       throw new Error('Backup job is already running');
     }
@@ -142,7 +149,7 @@ class BackupJob {
   /**
    * الحصول على حالة الوظيفة
    */
-  getStatus() {
+  getStatus () {
     return {
       isRunning: this.isRunning,
       lastBackup: this.lastBackup,
@@ -154,7 +161,7 @@ class BackupJob {
   /**
    * الحصول على وقت النسخ الاحتياطي التالي
    */
-  getNextBackupTime() {
+  getNextBackupTime () {
     if (!this.backupSchedule) {
       return null;
     }
@@ -174,7 +181,7 @@ class BackupJob {
   /**
    * إرسال إشعار فشل النسخ الاحتياطي
    */
-  sendBackupFailureNotification(error) {
+  sendBackupFailureNotification (error) {
     // يمكن إضافة خدمة إشعارات هنا (بريد إلكتروني، Slack، إلخ)
     logger.error('Backup failure notification:', {
       error: error.message,
@@ -186,14 +193,15 @@ class BackupJob {
   /**
    * التحقق من صحة النسخ الاحتياطية
    */
-  async validateBackups() {
+  async validateBackups () {
     try {
       logger.info('Starting backup validation...');
 
       const backups = await backupService.listBackups();
       const validationResults = [];
 
-      for (const backup of backups.slice(0, 5)) { // التحقق من آخر 5 نسخ فقط
+      for (const backup of backups.slice(0, 5)) {
+        // التحقق من آخر 5 نسخ فقط
         try {
           const validation = await backupService.validateBackup(backup.fileName);
           validationResults.push({

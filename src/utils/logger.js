@@ -7,18 +7,18 @@ const colors = {
   warn: 'yellow',
   info: 'green',
   http: 'magenta',
-  debug: 'white',
+  debug: 'white'
 };
 
 winston.addColors(colors);
 
 // تنسيق السجلات
 const logFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
-  winston.format.colorize({ all: true }),
+  winston.format.timestamp({format: 'YYYY-MM-DD HH:mm:ss:ms'}),
+  winston.format.colorize({all: true}),
   winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}`,
-  ),
+    (info) => `${info.timestamp} ${info.level}: ${info.message}`
+  )
 );
 
 // تنسيق JSON للسجلات
@@ -39,21 +39,21 @@ const logger = winston.createLogger({
       filename: path.join(logDir, 'error.log'),
       level: 'error',
       maxsize: 5242880, // 5MB
-      maxFiles: 5,
+      maxFiles: 5
     }),
     // سجل جميع الرسائل
     new winston.transports.File({
       filename: path.join(logDir, 'combined.log'),
       maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    }),
-  ],
+      maxFiles: 5
+    })
+  ]
 });
 
 // إضافة console transport في بيئة التطوير
 if (process.env.NODE_ENV === 'development') {
   logger.add(new winston.transports.Console({
-    format: logFormat,
+    format: logFormat
   }));
 }
 

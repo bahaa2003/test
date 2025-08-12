@@ -15,7 +15,7 @@ const scheduleSchema = new mongoose.Schema({
   department: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department',
-    required: function() {
+    required: function () {
       return this.college.hasDepartments;
     }
   },
@@ -24,10 +24,10 @@ const scheduleSchema = new mongoose.Schema({
     required: true,
     min: 1,
     validate: {
-      validator: function(value) {
+      validator: function (value) {
         const college = this.parent().college;
         const department = this.parent().department;
-        
+
         if (department) {
           return value <= department.totalYears;
         }
@@ -98,9 +98,9 @@ const scheduleSchema = new mongoose.Schema({
     ref: 'Admin'
   },
   publishedAt: Date
-}, { timestamps: true });
+}, {timestamps: true});
 
 // Indexes for better performance
-scheduleSchema.index({ academicYear: 1, yearNumber: 1, semester: 1 }, { unique: true });
+scheduleSchema.index({academicYear: 1, yearNumber: 1, semester: 1}, {unique: true});
 
 export const Schedule = mongoose.model('Schedule', scheduleSchema);

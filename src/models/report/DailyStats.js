@@ -14,9 +14,9 @@ const dailyStatsSchema = new mongoose.Schema({
   nfcScans: Number,
   manualEntries: Number,
   colleges: [{
-    collegeId: { type: mongoose.Schema.Types.ObjectId, ref: 'College' },
+    collegeId: {type: mongoose.Schema.Types.ObjectId, ref: 'College'},
     attendanceRate: Number
   }]
-}, { timestamps: true });
+}, {timestamps: true});
 
 export const DailyStats = mongoose.model('DailyStats', dailyStatsSchema);

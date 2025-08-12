@@ -1,4 +1,4 @@
-import { AppError } from "./AppError.js";
+import {AppError} from './AppError.js';
 
 export const findByIdOrFail = async (Model, id, next) => {
   const document = await Model.findById(id);

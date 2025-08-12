@@ -1,12 +1,12 @@
-import { Attendance } from '../../models/operational/Attendance.js';
-import { Student } from '../../models/user/Student.js';
-import { Faculty } from '../../models/user/Faculty.js';
-import { Subject } from '../../models/academic/Subject.js';
-import { Schedule } from '../../models/academic/Schedule.js';
-import { College } from '../../models/academic/College.js';
-import { Department } from '../../models/academic/Department.js';
-import { catchAsync } from '../../utils/catchAsync.js';
-import { AppError } from '../../utils/AppError.js';
+import {Attendance} from '../../models/operational/Attendance.js';
+import {Student} from '../../models/user/Student.js';
+import {Faculty} from '../../models/user/Faculty.js';
+import {Subject} from '../../models/academic/Subject.js';
+import {Schedule} from '../../models/academic/Schedule.js';
+import {College} from '../../models/academic/College.js';
+import {Department} from '../../models/academic/Department.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {AppError} from '../../utils/AppError.js';
 import reportService from '../../services/reportService.js';
 
 /**
@@ -15,7 +15,7 @@ import reportService from '../../services/reportService.js';
  * @access  private (admin)
  */
 export const getSystemOverview = catchAsync(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const {startDate, endDate} = req.query;
 
   const filterQuery = {};
   if (startDate && endDate) {
@@ -28,18 +28,18 @@ export const getSystemOverview = catchAsync(async (req, res, next) => {
   // إحصائيات المستخدمين
   const [totalStudents, activeStudents, totalFaculty, activeFaculty] = await Promise.all([
     Student.countDocuments(),
-    Student.countDocuments({ isActive: true }),
+    Student.countDocuments({isActive: true}),
     Faculty.countDocuments(),
-    Faculty.countDocuments({ isActive: true })
+    Faculty.countDocuments({isActive: true})
   ]);
 
   // إحصائيات الحضور
   const attendanceStats = await Attendance.aggregate([
-    { $match: filterQuery },
+    {$match: filterQuery},
     {
       $group: {
         _id: '$status',
-        count: { $sum: 1 }
+        count: {$sum: 1}
       }
     }
   ]);
@@ -59,8 +59,8 @@ export const getSystemOverview = catchAsync(async (req, res, next) => {
 
   const overview = {
     users: {
-      students: { total: totalStudents, active: activeStudents },
-      faculty: { total: totalFaculty, active: activeFaculty }
+      students: {total: totalStudents, active: activeStudents},
+      faculty: {total: totalFaculty, active: activeFaculty}
     },
     attendance: {
       total: totalAttendance,
@@ -79,7 +79,7 @@ export const getSystemOverview = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    data: { overview }
+    data: {overview}
   });
 });
 
@@ -89,7 +89,7 @@ export const getSystemOverview = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const getAttendanceReport = catchAsync(async (req, res, next) => {
-  const { startDate, endDate, collegeId, departmentId, subjectId } = req.query;
+  const {startDate, endDate, collegeId, departmentId, subjectId} = req.query;
 
   const filterQuery = {};
   if (startDate && endDate) {
@@ -101,7 +101,7 @@ export const getAttendanceReport = catchAsync(async (req, res, next) => {
 
   // بناء pipeline للتجميع
   const pipeline = [
-    { $match: filterQuery },
+    {$match: filterQuery},
     {
       $lookup: {
         from: 'schedules',
@@ -110,7 +110,7 @@ export const getAttendanceReport = catchAsync(async (req, res, next) => {
         as: 'schedule'
       }
     },
-    { $unwind: '$schedule' },
+    {$unwind: '$schedule'},
     {
       $lookup: {
         from: 'subjects',
@@ -119,7 +119,7 @@ export const getAttendanceReport = catchAsync(async (req, res, next) => {
         as: 'subject'
       }
     },
-    { $unwind: '$subject' },
+    {$unwind: '$subject'},
     {
       $lookup: {
         from: 'departments',
@@ -128,25 +128,25 @@ export const getAttendanceReport = catchAsync(async (req, res, next) => {
         as: 'department'
       }
     },
-    { $unwind: '$department' }
+    {$unwind: '$department'}
   ];
 
   // إضافة فلاتر إضافية
   if (collegeId) {
     pipeline.push({
-      $match: { 'department.collegeId': collegeId }
+      $match: {'department.collegeId': collegeId}
     });
   }
 
   if (departmentId) {
     pipeline.push({
-      $match: { 'department._id': departmentId }
+      $match: {'department._id': departmentId}
     });
   }
 
   if (subjectId) {
     pipeline.push({
-      $match: { 'subject._id': subjectId }
+      $match: {'subject._id': subjectId}
     });
   }
 
@@ -154,12 +154,12 @@ export const getAttendanceReport = catchAsync(async (req, res, next) => {
   pipeline.push({
     $group: {
       _id: {
-        date: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
+        date: {$dateToString: {format: '%Y-%m-%d', date: '$date'}},
         status: '$status',
         subject: '$subject.name',
         department: '$department.name'
       },
-      count: { $sum: 1 }
+      count: {$sum: 1}
     }
   });
 
@@ -168,7 +168,7 @@ export const getAttendanceReport = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: attendanceData.length,
-    data: { attendanceData }
+    data: {attendanceData}
   });
 });
 
@@ -178,7 +178,7 @@ export const getAttendanceReport = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const getCollegesReport = catchAsync(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const {startDate, endDate} = req.query;
 
   const filterQuery = {};
   if (startDate && endDate) {
@@ -218,15 +218,15 @@ export const getCollegesReport = catchAsync(async (req, res, next) => {
         name: 1,
         code: 1,
         isActive: 1,
-        departmentsCount: { $size: '$departments' },
-        facultyCount: { $size: '$faculty' },
-        studentsCount: { $size: '$students' },
+        departmentsCount: {$size: '$departments'},
+        facultyCount: {$size: '$faculty'},
+        studentsCount: {$size: '$students'},
         activeFacultyCount: {
           $size: {
             $filter: {
               input: '$faculty',
               as: 'f',
-              cond: { $eq: ['$$f.isActive', true] }
+              cond: {$eq: ['$$f.isActive', true]}
             }
           }
         },
@@ -235,7 +235,7 @@ export const getCollegesReport = catchAsync(async (req, res, next) => {
             $filter: {
               input: '$students',
               as: 's',
-              cond: { $eq: ['$$s.isActive', true] }
+              cond: {$eq: ['$$s.isActive', true]}
             }
           }
         }
@@ -246,7 +246,7 @@ export const getCollegesReport = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: collegesData.length,
-    data: { collegesData }
+    data: {collegesData}
   });
 });
 
@@ -256,7 +256,7 @@ export const getCollegesReport = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const getDepartmentsReport = catchAsync(async (req, res, next) => {
-  const { collegeId } = req.query;
+  const {collegeId} = req.query;
 
   const filterQuery = {};
   if (collegeId) {
@@ -264,7 +264,7 @@ export const getDepartmentsReport = catchAsync(async (req, res, next) => {
   }
 
   const departmentsData = await Department.aggregate([
-    { $match: filterQuery },
+    {$match: filterQuery},
     {
       $lookup: {
         from: 'colleges',
@@ -273,7 +273,7 @@ export const getDepartmentsReport = catchAsync(async (req, res, next) => {
         as: 'college'
       }
     },
-    { $unwind: '$college' },
+    {$unwind: '$college'},
     {
       $lookup: {
         from: 'faculties',
@@ -302,17 +302,17 @@ export const getDepartmentsReport = catchAsync(async (req, res, next) => {
       $project: {
         name: 1,
         code: 1,
-        college: { name: '$college.name', code: '$college.code' },
+        college: {name: '$college.name', code: '$college.code'},
         isActive: 1,
-        facultyCount: { $size: '$faculty' },
-        studentsCount: { $size: '$students' },
-        subjectsCount: { $size: '$subjects' },
+        facultyCount: {$size: '$faculty'},
+        studentsCount: {$size: '$students'},
+        subjectsCount: {$size: '$subjects'},
         activeFacultyCount: {
           $size: {
             $filter: {
               input: '$faculty',
               as: 'f',
-              cond: { $eq: ['$$f.isActive', true] }
+              cond: {$eq: ['$$f.isActive', true]}
             }
           }
         },
@@ -321,7 +321,7 @@ export const getDepartmentsReport = catchAsync(async (req, res, next) => {
             $filter: {
               input: '$students',
               as: 's',
-              cond: { $eq: ['$$s.isActive', true] }
+              cond: {$eq: ['$$s.isActive', true]}
             }
           }
         }
@@ -332,7 +332,7 @@ export const getDepartmentsReport = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: departmentsData.length,
-    data: { departmentsData }
+    data: {departmentsData}
   });
 });
 
@@ -342,14 +342,14 @@ export const getDepartmentsReport = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const getSubjectsReport = catchAsync(async (req, res, next) => {
-  const { departmentId, isActive } = req.query;
+  const {departmentId, isActive} = req.query;
 
   const filterQuery = {};
-  if (departmentId) filterQuery.departmentId = departmentId;
-  if (isActive !== undefined) filterQuery.isActive = isActive === 'true';
+  if (departmentId) { filterQuery.departmentId = departmentId; }
+  if (isActive !== undefined) { filterQuery.isActive = isActive === 'true'; }
 
   const subjectsData = await Subject.aggregate([
-    { $match: filterQuery },
+    {$match: filterQuery},
     {
       $lookup: {
         from: 'departments',
@@ -358,7 +358,7 @@ export const getSubjectsReport = catchAsync(async (req, res, next) => {
         as: 'department'
       }
     },
-    { $unwind: '$department' },
+    {$unwind: '$department'},
     {
       $lookup: {
         from: 'schedules',
@@ -372,15 +372,15 @@ export const getSubjectsReport = catchAsync(async (req, res, next) => {
         name: 1,
         code: 1,
         credits: 1,
-        department: { name: '$department.name', code: '$department.code' },
+        department: {name: '$department.name', code: '$department.code'},
         isActive: 1,
-        schedulesCount: { $size: '$schedules' },
+        schedulesCount: {$size: '$schedules'},
         activeSchedulesCount: {
           $size: {
             $filter: {
               input: '$schedules',
               as: 's',
-              cond: { $eq: ['$$s.isActive', true] }
+              cond: {$eq: ['$$s.isActive', true]}
             }
           }
         }
@@ -391,7 +391,7 @@ export const getSubjectsReport = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: subjectsData.length,
-    data: { subjectsData }
+    data: {subjectsData}
   });
 });
 
@@ -401,7 +401,7 @@ export const getSubjectsReport = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const exportReportToPdf = catchAsync(async (req, res, next) => {
-  const { reportType, startDate, endDate } = req.query;
+  const {reportType, startDate, endDate} = req.query;
 
   if (!reportType) {
     return next(new AppError('نوع التقرير مطلوب', 400));
@@ -433,6 +433,6 @@ export const exportReportToPdf = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     message: 'تم إنشاء التقرير بنجاح',
-    data: { reportData }
+    data: {reportData}
   });
 });

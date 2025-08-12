@@ -1,12 +1,12 @@
-import { catchAsync } from '../../utils/catchError.js';
-import { Schedule } from '../../models/academic/Schedule.js';
-import { AppError } from '../../utils/AppError.js';
-import { Section } from '../../models/academic/Section.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {Schedule} from '../../models/academic/Schedule.js';
+import {AppError} from '../../utils/AppError.js';
+import {Section} from '../../models/academic/Section.js';
 
 // إنشاء جدول محاضرات جديد
 export const createSchedule = catchAsync(async (req, res, next) => {
   const faculty = req.user;
-  
+
   // التحقق من أن المحاضر مسجل في المادة
   const section = await Section.findById(req.body.section);
   if (!section.faculty.equals(faculty._id)) {
@@ -24,8 +24,8 @@ export const createSchedule = catchAsync(async (req, res, next) => {
   const conflictingSchedule = await Schedule.findOne({
     faculty: faculty._id,
     'timeSlots.day': req.body.timeSlots.day,
-    'timeSlots.startTime': { $lt: req.body.timeSlots.endTime },
-    'timeSlots.endTime': { $gt: req.body.timeSlots.startTime }
+    'timeSlots.startTime': {$lt: req.body.timeSlots.endTime},
+    'timeSlots.endTime': {$gt: req.body.timeSlots.startTime}
   });
 
   if (conflictingSchedule) {
@@ -37,18 +37,18 @@ export const createSchedule = catchAsync(async (req, res, next) => {
   // تحديث القسم بإضافة الجدول الجديد
   await Section.findByIdAndUpdate(
     req.body.section,
-    { $push: { schedules: schedule._id } }
+    {$push: {schedules: schedule._id}}
   );
 
   res.status(201).json({
     status: 'success',
-    data: { schedule }
+    data: {schedule}
   });
 });
 
 // الحصول على جدول محاضر معين مع تفاصيل كاملة
 export const getFacultySchedule = catchAsync(async (req, res, next) => {
-  const schedules = await Schedule.find({ faculty: req.user._id })
+  const schedules = await Schedule.find({faculty: req.user._id})
     .populate({
       path: 'section',
       populate: {
@@ -65,21 +65,21 @@ export const getFacultySchedule = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: schedules.length,
-    data: { schedules }
+    data: {schedules}
   });
 });
 
 // تحديث جدول المحاضرات مع التحقق من الصلاحيات
 export const updateSchedule = catchAsync(async (req, res, next) => {
   const schedule = await Schedule.findOneAndUpdate(
-    { 
-      _id: req.params.id, 
-      faculty: req.user._id 
+    {
+      _id: req.params.id,
+      faculty: req.user._id
     },
     req.body,
-    { 
+    {
       new: true,
-      runValidators: true 
+      runValidators: true
     }
   );
 
@@ -89,7 +89,7 @@ export const updateSchedule = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    data: { schedule }
+    data: {schedule}
   });
 });
 
@@ -107,7 +107,7 @@ export const deleteSchedule = catchAsync(async (req, res, next) => {
   // إزالة الجدول من القسم المرتبط
   await Section.findByIdAndUpdate(
     schedule.section,
-    { $pull: { schedules: schedule._id } }
+    {$pull: {schedules: schedule._id}}
   );
 
   res.status(204).json({

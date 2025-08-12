@@ -9,7 +9,7 @@ import hpp from 'hpp';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 
 // Import routes
 import academicRoutes from './routes/academic/index.js';
@@ -19,11 +19,11 @@ import authRoutes from './routes/auth/authRoutes.js';
 import reportRoutes from './routes/report/index.js';
 
 // Import middlewares
-import { errorHandler, notFound } from './middlewares/errorHandler.js';
+import {errorHandler, notFound} from './middlewares/errorHandler.js';
 
 // Import utilities
 import logger from './utils/logger.js';
-import { optimizeDatabaseSettings } from './utils/dbOptimization.js';
+import {optimizeDatabaseSettings} from './utils/dbOptimization.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,9 +40,9 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-    },
-  },
+      imgSrc: ["'self'", 'data:', 'https:']
+    }
+  }
 }));
 
 // Rate limiting
@@ -54,14 +54,14 @@ const limiter = rateLimit({
     message: 'تم تجاوز الحد الأقصى للطلبات، يرجى المحاولة لاحقاً'
   },
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: false
 });
 
 app.use('/api/', limiter);
 
 // Body parser
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({limit: '10mb'}));
+app.use(express.urlencoded({extended: true, limit: '10mb'}));
 
 // Cookie parser
 app.use(cookieParser());

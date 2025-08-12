@@ -1,40 +1,60 @@
 import jwt from 'jsonwebtoken';
-import config from '../../../config/config.js';
+import config from '../../config/config.js';
 
 /**
  * إنشاء JWT token
- * @param {string} userId - معرف المستخدم
+ * @param {string} id - معرف المستخدم
  * @param {string} role - دور المستخدم
- * @param {string} type - نوع التوكن (access/refresh)
- * @returns {string} التوكن الموقّع
+ * @param {string} type - نوع التوكن (access أو refresh)
+ * @returns {string} JWT token
  */
-export const signToken = (userId, role, type = 'access') => {
-  const payload = {
-    id: userId,
-    role: role,
-    type: type
-  };
-
-  const options = {
-    expiresIn: type === 'refresh' ? config.jwt.refreshExpiresIn : config.jwt.expiresIn,
-    issuer: 'attendance-system',
-    audience: 'attendance-system-users'
-  };
-
+export const signToken = (id, role, type = 'access') => {
   const secret = type === 'refresh' ? config.jwt.refreshSecret : config.jwt.secret;
+  const expiresIn = type === 'refresh' ? config.jwt.refreshExpiresIn : config.jwt.expiresIn;
 
-  return jwt.sign(payload, secret, options);
+  return jwt.sign(
+    {
+      id,
+      role,
+      type
+    },
+    secret,
+    {
+      expiresIn
+    }
+  );
 };
 
 /**
  * التحقق من صحة JWT token
- * @param {string} token - التوكن للتحقق منه
- * @param {string} type - نوع التوكن (access/refresh)
- * @returns {object} البيانات المفككة من التوكن
+ * @param {string} token - JWT token
+ * @param {string} type - نوع التوكن (access أو refresh)
+ * @returns {object} البيانات المشفرة في التوكن
  */
 export const verifyToken = (token, type = 'access') => {
   const secret = type === 'refresh' ? config.jwt.refreshSecret : config.jwt.secret;
-  return jwt.verify(token, secret);
+
+  try {
+    return jwt.verify(token, secret);
+  } catch (error) {
+    throw new Error('توكن غير صالح');
+  }
+};
+
+/**
+ * إنشاء access token و refresh token
+ * @param {string} id - معرف المستخدم
+ * @param {string} role - دور المستخدم
+ * @returns {object} access token و refresh token
+ */
+export const createTokens = (id, role) => {
+  const accessToken = signToken(id, role, 'access');
+  const refreshToken = signToken(id, role, 'refresh');
+
+  return {
+    accessToken,
+    refreshToken
+  };
 };
 
 /**
@@ -42,6 +62,6 @@ export const verifyToken = (token, type = 'access') => {
  * @param {string} token - التوكن لفك تشفيره
  * @returns {object} البيانات المفككة من التوكن
  */
-export const decodeToken = (token) => {
+export const decodeToken = token => {
   return jwt.decode(token);
 };

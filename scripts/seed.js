@@ -8,24 +8,24 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 
 // إعداد المسارات
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // تحميل متغيرات البيئة
-dotenv.config({ path: path.join(__dirname, '..', '.env') });
+dotenv.config({path: path.join(__dirname, '..', '.env')});
 
 // استيراد النماذج
-import { Admin, Faculty, Student } from '../src/models/user/index.js';
-import { College, Department, Program, Subject } from '../src/models/academic/index.js';
-import { TimeSlot } from '../src/models/operational/TimeSlot.js';
+import {Admin, Faculty, Student} from '../src/models/user/index.js';
+import {College, Department, Program, Subject} from '../src/models/academic/index.js';
+import {TimeSlot} from '../src/models/operational/TimeSlot.js';
 
 /**
  * الاتصال بقاعدة البيانات
  */
-async function connectDB() {
+async function connectDB () {
   try {
     const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/attendance-system';
     await mongoose.connect(uri);
@@ -39,7 +39,7 @@ async function connectDB() {
 /**
  * إنشاء مستخدمي الإدارة
  */
-async function seedAdmins() {
+async function seedAdmins () {
   try {
     const adminData = [
       {
@@ -73,7 +73,7 @@ async function seedAdmins() {
 /**
  * إنشاء الكليات
  */
-async function seedColleges() {
+async function seedColleges () {
   try {
     const collegeData = [
       {
@@ -115,7 +115,7 @@ async function seedColleges() {
 /**
  * إنشاء الأقسام
  */
-async function seedDepartments(colleges) {
+async function seedDepartments (colleges) {
   try {
     const departmentData = [
       // كلية الهندسة
@@ -178,7 +178,7 @@ async function seedDepartments(colleges) {
 /**
  * إنشاء البرامج الأكاديمية
  */
-async function seedPrograms(departments) {
+async function seedPrograms (departments) {
   try {
     const programData = [
       {
@@ -228,7 +228,7 @@ async function seedPrograms(departments) {
 /**
  * إنشاء المدرسين
  */
-async function seedFaculty(departments) {
+async function seedFaculty (departments) {
   try {
     const facultyData = [
       {
@@ -286,7 +286,7 @@ async function seedFaculty(departments) {
 /**
  * إنشاء المواد الدراسية
  */
-async function seedSubjects(faculty, departments) {
+async function seedSubjects (faculty, departments) {
   try {
     const subjectData = [
       {
@@ -349,7 +349,7 @@ async function seedSubjects(faculty, departments) {
 /**
  * إنشاء الطلاب
  */
-async function seedStudents(programs) {
+async function seedStudents (programs) {
   try {
     const studentData = [
       {
@@ -422,7 +422,7 @@ async function seedStudents(programs) {
 /**
  * إنشاء الفترات الزمنية
  */
-async function seedTimeSlots() {
+async function seedTimeSlots () {
   try {
     const timeSlotData = [
       {
@@ -475,7 +475,7 @@ async function seedTimeSlots() {
 /**
  * تشغيل عملية البذر
  */
-async function runSeed() {
+async function runSeed () {
   try {
     console.log('🌱 Starting database seeding...');
 
@@ -506,7 +506,6 @@ async function runSeed() {
     console.log('   Admin: admin@university.edu / Admin123!');
     console.log('   Faculty: ahmed.mohamed@university.edu / Faculty123!');
     console.log('   Student: ali.ahmed@student.university.edu / Student123!');
-
   } catch (error) {
     console.error('❌ Seeding failed:', error);
     process.exit(1);

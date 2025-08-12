@@ -1,12 +1,14 @@
-import { College } from '../models/academic/College.js';
-import { Department } from '../models/academic/Department.js';
-import { Subject } from '../models/academic/Subject.js';
-import { Schedule } from '../models/academic/Schedule.js';
-import { Attendance } from '../models/operational/Attendance.js';
-import { NfcDevice } from '../models/operational/NfcDevice.js';
-import { Admin } from '../models/user/Admin.js';
-import { Faculty } from '../models/user/Faculty.js';
-import { Student } from '../models/user/Student.js';
+import {University} from '../models/academic/University.js';
+import {College} from '../models/academic/College.js';
+import {Department} from '../models/academic/Department.js';
+import {Subject} from '../models/academic/Subject.js';
+import {Schedule} from '../models/academic/Schedule.js';
+import {Enrollment} from '../models/academic/Enrollment.js';
+import {Attendance} from '../models/operational/Attendance.js';
+import {NfcDevice} from '../models/operational/NfcDevice.js';
+import {Admin} from '../models/user/Admin.js';
+import {Faculty} from '../models/user/Faculty.js';
+import {Student} from '../models/user/Student.js';
 import logger from './logger.js';
 
 /**
@@ -16,66 +18,96 @@ export const createDatabaseIndexes = async () => {
   try {
     logger.info('إنشاء فهارس قاعدة البيانات...');
 
+    // فهارس الجامعات
+    await University.collection.createIndex({code: 1}, {unique: true});
+    await University.collection.createIndex({isActive: 1});
+    await University.collection.createIndex({country: 1, city: 1});
+
     // فهارس الكليات
-    await College.collection.createIndex({ code: 1 }, { unique: true });
-    await College.collection.createIndex({ isActive: 1 });
-    await College.collection.createIndex({ name: 'text' });
+    await College.collection.createIndex({university: 1, code: 1}, {unique: true});
+    await College.collection.createIndex({university: 1});
+    await College.collection.createIndex({dean: 1});
+    await College.collection.createIndex({isActive: 1});
 
     // فهارس الأقسام
-    await Department.collection.createIndex({ code: 1 }, { unique: true });
-    await Department.collection.createIndex({ collegeId: 1 });
-    await Department.collection.createIndex({ isActive: 1 });
-    await Department.collection.createIndex({ name: 'text' });
+    await Department.collection.createIndex({university: 1, code: 1}, {unique: true});
+    await Department.collection.createIndex({university: 1});
+    await Department.collection.createIndex({college: 1});
+    await Department.collection.createIndex({isActive: 1});
 
     // فهارس المواد الدراسية
-    await Subject.collection.createIndex({ code: 1 }, { unique: true });
-    await Subject.collection.createIndex({ departmentId: 1 });
-    await Subject.collection.createIndex({ isActive: 1 });
-    await Subject.collection.createIndex({ name: 'text', code: 'text' });
+    await Subject.collection.createIndex({university: 1, code: 1}, {unique: true});
+    await Subject.collection.createIndex({university: 1});
+    await Subject.collection.createIndex({department: 1});
+    await Subject.collection.createIndex({isActive: 1});
 
     // فهارس الجداول الدراسية
-    await Schedule.collection.createIndex({ subjectId: 1 });
-    await Schedule.collection.createIndex({ facultyId: 1 });
-    await Schedule.collection.createIndex({ isActive: 1 });
-    await Schedule.collection.createIndex({ dayOfWeek: 1, startTime: 1 });
-    await Schedule.collection.createIndex({ subjectId: 1, facultyId: 1 });
+    await Schedule.collection.createIndex({university: 1});
+    await Schedule.collection.createIndex({subject: 1});
+    await Schedule.collection.createIndex({faculty: 1});
+    await Schedule.collection.createIndex({isActive: 1});
+    await Schedule.collection.createIndex({dayOfWeek: 1, startTime: 1});
+
+    // فهارس التسجيل
+    await Enrollment.collection.createIndex(
+      {
+        student: 1,
+        subject: 1,
+        academicYear: 1,
+        semester: 1
+      },
+      {unique: true}
+    );
+    await Enrollment.collection.createIndex({student: 1});
+    await Enrollment.collection.createIndex({subject: 1});
+    await Enrollment.collection.createIndex({academicYear: 1});
+    await Enrollment.collection.createIndex({status: 1});
 
     // فهارس الحضور
-    await Attendance.collection.createIndex({ studentId: 1, date: 1 });
-    await Attendance.collection.createIndex({ facultyId: 1, date: 1 });
-    await Attendance.collection.createIndex({ scheduleId: 1, date: 1 });
-    await Attendance.collection.createIndex({ date: 1 });
-    await Attendance.collection.createIndex({ status: 1 });
-    await Attendance.collection.createIndex({ type: 1 });
-    await Attendance.collection.createIndex({
-      studentId: 1,
-      scheduleId: 1,
-      date: 1
-    }, { unique: true });
+    await Attendance.collection.createIndex({student: 1, schedule: 1, date: 1}, {unique: true});
+    await Attendance.collection.createIndex({faculty: 1, schedule: 1, date: 1});
+    await Attendance.collection.createIndex({schedule: 1, date: 1});
+    await Attendance.collection.createIndex({date: 1});
+    await Attendance.collection.createIndex({status: 1});
+    await Attendance.collection.createIndex({recordedBy: 1});
+    await Attendance.collection.createIndex({device: 1});
 
     // فهارس أجهزة NFC
-    await NfcDevice.collection.createIndex({ deviceId: 1 }, { unique: true });
-    await NfcDevice.collection.createIndex({ isActive: 1 });
-    await NfcDevice.collection.createIndex({ location: 1 });
+    await NfcDevice.collection.createIndex({deviceId: 1}, {unique: true});
+    await NfcDevice.collection.createIndex({isActive: 1});
+    await NfcDevice.collection.createIndex({location: 1});
 
-    // فهارس المستخدمين
-    await Admin.collection.createIndex({ email: 1 }, { unique: true });
-    await Admin.collection.createIndex({ isActive: 1 });
+    // فهارس المستخدمين - Admin
+    await Admin.collection.createIndex({email: 1}, {unique: true});
+    await Admin.collection.createIndex({employeeId: 1}, {unique: true});
+    await Admin.collection.createIndex({university: 1});
+    await Admin.collection.createIndex({college: 1});
+    await Admin.collection.createIndex({isActive: 1});
 
-    await Faculty.collection.createIndex({ email: 1 }, { unique: true });
-    await Faculty.collection.createIndex({ employeeId: 1 }, { unique: true });
-    await Faculty.collection.createIndex({ departmentId: 1 });
-    await Faculty.collection.createIndex({ collegeId: 1 });
-    await Faculty.collection.createIndex({ isActive: 1 });
-    await Faculty.collection.createIndex({ name: 'text', email: 'text' });
+    // فهارس المستخدمين - Faculty
+    await Faculty.collection.createIndex({email: 1}, {unique: true});
+    await Faculty.collection.createIndex({academicId: 1}, {unique: true});
+    await Faculty.collection.createIndex({university: 1});
+    await Faculty.collection.createIndex({college: 1});
+    await Faculty.collection.createIndex({department: 1});
+    await Faculty.collection.createIndex({isActive: 1});
+    await Faculty.collection.createIndex(
+      {'nfcCard.serialNumber': 1},
+      {unique: true, sparse: true}
+    );
 
-    await Student.collection.createIndex({ email: 1 }, { unique: true });
-    await Student.collection.createIndex({ studentId: 1 }, { unique: true });
-    await Student.collection.createIndex({ cardId: 1 }, { unique: true });
-    await Student.collection.createIndex({ departmentId: 1 });
-    await Student.collection.createIndex({ collegeId: 1 });
-    await Student.collection.createIndex({ isActive: 1 });
-    await Student.collection.createIndex({ name: 'text', email: 'text', studentId: 'text' });
+    // فهارس المستخدمين - Student
+    await Student.collection.createIndex({email: 1}, {unique: true});
+    await Student.collection.createIndex({academicId: 1}, {unique: true});
+    await Student.collection.createIndex(
+      {'nfcCard.serialNumber': 1},
+      {unique: true, sparse: true}
+    );
+    await Student.collection.createIndex({university: 1});
+    await Student.collection.createIndex({college: 1});
+    await Student.collection.createIndex({department: 1});
+    await Student.collection.createIndex({academicYear: 1});
+    await Student.collection.createIndex({isActive: 1});
 
     logger.info('تم إنشاء فهارس قاعدة البيانات بنجاح');
   } catch (error) {
@@ -91,10 +123,12 @@ export const dropDatabaseIndexes = async () => {
   try {
     logger.info('حذف فهارس قاعدة البيانات...');
 
+    await University.collection.dropIndexes();
     await College.collection.dropIndexes();
     await Department.collection.dropIndexes();
     await Subject.collection.dropIndexes();
     await Schedule.collection.dropIndexes();
+    await Enrollment.collection.dropIndexes();
     await Attendance.collection.dropIndexes();
     await NfcDevice.collection.dropIndexes();
     await Admin.collection.dropIndexes();

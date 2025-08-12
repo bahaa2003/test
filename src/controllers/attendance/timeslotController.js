@@ -1,7 +1,7 @@
-import { TimeSlot } from '../../models/operational/TimeSlot.js';
-import { catchAsync } from '../../utils/catchAsync.js';
-import { AppError } from '../../utils/AppError.js';
-import { ApiFeatures } from '../../utils/ApiFeatures.js';
+import {TimeSlot} from '../../models/operational/TimeSlot.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {AppError} from '../../utils/AppError.js';
+import {ApiFeatures} from '../../utils/ApiFeatures.js';
 
 /**
  * @desc    إنشاء فترة زمنية جديدة
@@ -116,7 +116,7 @@ export const deleteTimeSlot = catchAsync(async (req, res, next) => {
  * @access  public
  */
 export const getActiveTimeSlots = catchAsync(async (req, res, next) => {
-  const timeSlots = await TimeSlot.find({ isActive: true }).sort('startTime');
+  const timeSlots = await TimeSlot.find({isActive: true}).sort('startTime');
 
   res.status(200).json({
     status: 'success',

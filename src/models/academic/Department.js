@@ -13,8 +13,8 @@ const departmentSchema = new mongoose.Schema({
     unique: true,
     uppercase: true,
     validate: {
-      validator: function(v) {
-        return /^[A-Z]{2,4}$/.test(v);
+      validator: function (v) {
+        return (/^[A-Z]{2,4}$/).test(v);
       },
       message: 'كود القسم يجب أن يكون 2-4 أحرف لاتينية كبيرة'
     }
@@ -28,8 +28,8 @@ const departmentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Faculty',
     validate: {
-      validator: async function(v) {
-        if (!v) return true;
+      validator: async function (v) {
+        if (!v) { return true; }
         const faculty = await mongoose.model('Faculty').findById(v);
         return faculty && ['professor', 'associateProfessor'].includes(faculty.designation);
       },
@@ -66,8 +66,8 @@ const departmentSchema = new mongoose.Schema({
       type: String,
       lowercase: true,
       validate: {
-        validator: function(v) {
-          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+        validator: function (v) {
+          return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/).test(v);
         },
         message: 'البريد الإلكتروني غير صالح'
       }
@@ -77,14 +77,14 @@ const departmentSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   }
-}, { 
+}, {
   timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toJSON: {virtuals: true},
+  toObject: {virtuals: true}
 });
 
 // Indexes for performance
-departmentSchema.index({ code: 1, college: 1 }, { unique: true });
+departmentSchema.index({code: 1, college: 1}, {unique: true});
 
 
 // Virtual for faculty count

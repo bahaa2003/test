@@ -1,8 +1,8 @@
-import { Admin } from '../../models/user/Admin.js';
-import { Faculty } from '../../models/user/Faculty.js';
-import { Student } from '../../models/user/Student.js';
-import { catchAsync } from '../../utils/catchAsync.js';
-import { AppError } from '../../utils/AppError.js';
+import {Admin} from '../../models/user/Admin.js';
+import {Faculty} from '../../models/user/Faculty.js';
+import {Student} from '../../models/user/Student.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {AppError} from '../../utils/AppError.js';
 
 /**
  * @desc    الحصول على الملف الشخصي للمستخدم
@@ -10,7 +10,7 @@ import { AppError } from '../../utils/AppError.js';
  * @access  private
  */
 export const getProfile = catchAsync(async (req, res, next) => {
-  const { role } = req.user;
+  const {role} = req.user;
 
   // تحديد النموذج حسب الدور
   let UserModel;
@@ -39,7 +39,7 @@ export const getProfile = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    data: { user }
+    data: {user}
   });
 });
 
@@ -49,8 +49,8 @@ export const getProfile = catchAsync(async (req, res, next) => {
  * @access  private
  */
 export const updateProfile = catchAsync(async (req, res, next) => {
-  const { role } = req.user;
-  const { name, email, phone, avatar } = req.body;
+  const {role} = req.user;
+  const {name, email, phone, avatar} = req.body;
 
   // تحديد النموذج حسب الدور
   let UserModel;
@@ -72,7 +72,7 @@ export const updateProfile = catchAsync(async (req, res, next) => {
   if (email) {
     const existingUser = await UserModel.findOne({
       email,
-      _id: { $ne: req.user._id }
+      _id: {$ne: req.user._id}
     });
     if (existingUser) {
       return next(new AppError('البريد الإلكتروني مستخدم بالفعل', 400));
@@ -81,16 +81,15 @@ export const updateProfile = catchAsync(async (req, res, next) => {
 
   // تحديث البيانات المسموح بها فقط
   const updateData = {};
-  if (name) updateData.name = name;
-  if (email) updateData.email = email;
-  if (phone) updateData.phone = phone;
-  if (avatar) updateData.avatar = avatar;
+  if (name) { updateData.name = name; }
+  if (email) { updateData.email = email; }
+  if (phone) { updateData.phone = phone; }
+  if (avatar) { updateData.avatar = avatar; }
 
-  const user = await UserModel.findByIdAndUpdate(
-    req.user._id,
-    updateData,
-    { new: true, runValidators: true }
-  ).populate('departmentId', 'name code');
+  const user = await UserModel.findByIdAndUpdate(req.user._id, updateData, {
+    new: true,
+    runValidators: true
+  }).populate('departmentId', 'name code');
 
   if (!user) {
     return next(new AppError('المستخدم غير موجود', 404));
@@ -99,7 +98,7 @@ export const updateProfile = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     message: 'تم تحديث الملف الشخصي بنجاح',
-    data: { user }
+    data: {user}
   });
 });
 
@@ -109,8 +108,8 @@ export const updateProfile = catchAsync(async (req, res, next) => {
  * @access  private
  */
 export const deleteProfile = catchAsync(async (req, res, next) => {
-  const { role } = req.user;
-  const { password } = req.body;
+  const {role} = req.user;
+  const {password} = req.body;
 
   if (!password) {
     return next(new AppError('يرجى إدخال كلمة المرور للتأكيد', 400));
@@ -134,7 +133,7 @@ export const deleteProfile = catchAsync(async (req, res, next) => {
 
   // التحقق من كلمة المرور
   const user = await UserModel.findById(req.user._id).select('+password');
-  if (!user || !(await user.correctPassword(password, user.password))) {
+  if (!user || !(await user.comparePassword(password))) {
     return next(new AppError('كلمة المرور غير صحيحة', 401));
   }
 
@@ -161,7 +160,7 @@ export const uploadAvatar = catchAsync(async (req, res, next) => {
     return next(new AppError('يرجى رفع صورة', 400));
   }
 
-  const { role } = req.user;
+  const {role} = req.user;
 
   // تحديد النموذج حسب الدور
   let UserModel;
@@ -181,11 +180,7 @@ export const uploadAvatar = catchAsync(async (req, res, next) => {
 
   // تحديث الصورة
   const avatar = `/uploads/avatars/${req.file.filename}`;
-  const user = await UserModel.findByIdAndUpdate(
-    req.user._id,
-    { avatar },
-    { new: true }
-  );
+  const user = await UserModel.findByIdAndUpdate(req.user._id, {avatar}, {new: true});
 
   if (!user) {
     return next(new AppError('المستخدم غير موجود', 404));
@@ -194,7 +189,7 @@ export const uploadAvatar = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     message: 'تم رفع الصورة بنجاح',
-    data: { avatar: user.avatar }
+    data: {avatar: user.avatar}
   });
 });
 
@@ -204,7 +199,7 @@ export const uploadAvatar = catchAsync(async (req, res, next) => {
  * @access  private
  */
 export const getProfileStats = catchAsync(async (req, res, next) => {
-  const { role } = req.user;
+  const {role} = req.user;
 
   // تحديد النموذج حسب الدور
   let UserModel;
@@ -250,6 +245,6 @@ export const getProfileStats = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    data: { stats }
+    data: {stats}
   });
 });

@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { AppError } from '../../utils/AppError.js';
+import {AppError} from '../../utils/AppError.js';
 import moment from 'moment-timezone';
 
 export const validateManualAttendance = (req, res, next) => {
@@ -42,8 +42,8 @@ export const validateManualAttendance = (req, res, next) => {
       })
   });
 
-  const { error } = schema.validate(req.body);
-  if (error) return next(new AppError(error.details[0].message, 400));
+  const {error} = schema.validate(req.body);
+  if (error) { return next(new AppError(error.details[0].message, 400)); }
 
   next();
 };
@@ -69,8 +69,8 @@ export const validateAttendanceUpdate = (req, res, next) => {
       })
   });
 
-  const { error } = schema.validate(req.body);
-  if (error) return next(new AppError(error.details[0].message, 400));
+  const {error} = schema.validate(req.body);
+  if (error) { return next(new AppError(error.details[0].message, 400)); }
 
   next();
 };
@@ -112,8 +112,8 @@ export const validateAttendanceQuery = (req, res, next) => {
       })
   });
 
-  const { error } = schema.validate(req.query);
-  if (error) return next(new AppError(error.details[0].message, 400));
+  const {error} = schema.validate(req.query);
+  if (error) { return next(new AppError(error.details[0].message, 400)); }
 
   next();
 };

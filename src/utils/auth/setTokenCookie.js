@@ -1,47 +1,45 @@
-import config from '../../../config/config.js';
+import config from '../../config/config.js';
 
 /**
- * تعيين JWT token في cookie
- * @param {object} res - كائن الاستجابة
- * @param {string} name - اسم الـ cookie
- * @param {string} token - التوكن
- * @param {object} options - خيارات إضافية
+ * تعيين JWT token في الكوكيز
+ * @param {object} res - response object
+ * @param {string} name - اسم الكوكي
+ * @param {string} token - JWT token
  */
-export const setTokenCookie = (res, name, token, options = {}) => {
-  const defaultOptions = {
+export const setTokenCookie = (res, name, token) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  res.cookie(name, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: name === 'refreshToken'
-      ? 7 * 24 * 60 * 60 * 1000 // 7 days
-      : 24 * 60 * 60 * 1000, // 1 day
-    path: '/'
-  };
-
-  const cookieOptions = { ...defaultOptions, ...options };
-
-  res.cookie(name, token, cookieOptions);
-};
-
-/**
- * مسح JWT token من cookie
- * @param {object} res - كائن الاستجابة
- * @param {string} name - اسم الـ cookie
- */
-export const clearTokenCookie = (res, name) => {
-  res.clearCookie(name, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: isProduction,
+    sameSite: isProduction ? 'strict' : 'lax',
+    maxAge:
+      name === 'accessToken'
+        ? 15 * 60 * 1000 // 15 minutes for access token
+        : 7 * 24 * 60 * 60 * 1000, // 7 days for refresh token
     path: '/'
   });
 };
 
 /**
- * مسح جميع cookies المتعلقة بالمصادقة
- * @param {object} res - كائن الاستجابة
+ * مسح JWT token من الكوكيز
+ * @param {object} res - response object
+ * @param {string} name - اسم الكوكي
  */
-export const clearAllAuthCookies = (res) => {
+export const clearTokenCookie = (res, name) => {
+  res.clearCookie(name, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    path: '/'
+  });
+};
+
+/**
+ * مسح جميع JWT tokens من الكوكيز
+ * @param {object} res - response object
+ */
+export const clearAllTokenCookies = res => {
   clearTokenCookie(res, 'accessToken');
   clearTokenCookie(res, 'refreshToken');
 };

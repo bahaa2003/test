@@ -123,7 +123,7 @@ export const updateUserSchema = Joi.object({
  * middleware للتحقق من صحة بيانات تسجيل الدخول
  */
 export const validateLogin = (req, res, next) => {
-  const { error } = loginSchema.validate(req.body);
+  const {error} = loginSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
       status: 'error',
@@ -137,7 +137,7 @@ export const validateLogin = (req, res, next) => {
  * middleware للتحقق من صحة بيانات تحديث كلمة المرور
  */
 export const validateUpdatePassword = (req, res, next) => {
-  const { error } = updatePasswordSchema.validate(req.body);
+  const {error} = updatePasswordSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
       status: 'error',
@@ -151,7 +151,7 @@ export const validateUpdatePassword = (req, res, next) => {
  * middleware للتحقق من صحة بيانات إنشاء مستخدم
  */
 export const validateCreateUser = (req, res, next) => {
-  const { error } = createUserSchema.validate(req.body);
+  const {error} = createUserSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
       status: 'error',
@@ -165,7 +165,7 @@ export const validateCreateUser = (req, res, next) => {
  * middleware للتحقق من صحة بيانات تحديث مستخدم
  */
 export const validateUpdateUser = (req, res, next) => {
-  const { error } = updateUserSchema.validate(req.body);
+  const {error} = updateUserSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
       status: 'error',

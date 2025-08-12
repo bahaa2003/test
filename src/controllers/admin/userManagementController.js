@@ -1,9 +1,9 @@
-import { Admin } from '../../models/user/Admin.js';
-import { Faculty } from '../../models/user/Faculty.js';
-import { Student } from '../../models/user/Student.js';
-import { catchAsync } from '../../utils/catchAsync.js';
-import { AppError } from '../../utils/AppError.js';
-import { ApiFeatures } from '../../utils/ApiFeatures.js';
+import {Admin} from '../../models/user/Admin.js';
+import {Faculty} from '../../models/user/Faculty.js';
+import {Student} from '../../models/user/Student.js';
+import {catchAsync} from '../../utils/catchAsync.js';
+import {AppError} from '../../utils/AppError.js';
+import {ApiFeatures} from '../../utils/ApiFeatures.js';
 
 /**
  * @desc    الحصول على جميع المستخدمين
@@ -11,7 +11,7 @@ import { ApiFeatures } from '../../utils/ApiFeatures.js';
  * @access  private (admin)
  */
 export const getAllUsers = catchAsync(async (req, res, next) => {
-  const { role, isActive, search } = req.query;
+  const {role, isActive, search} = req.query;
 
   let query = {};
   let model;
@@ -38,8 +38,8 @@ export const getAllUsers = catchAsync(async (req, res, next) => {
 
   if (search) {
     query.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } }
+      {name: {$regex: search, $options: 'i'}},
+      {email: {$regex: search, $options: 'i'}}
     ];
   }
 
@@ -56,7 +56,7 @@ export const getAllUsers = catchAsync(async (req, res, next) => {
     status: 'success',
     results: users.length,
     total,
-    data: { users }
+    data: {users}
   });
 });
 
@@ -66,7 +66,7 @@ export const getAllUsers = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const getUserById = catchAsync(async (req, res, next) => {
-  const { role, id } = req.params;
+  const {role, id} = req.params;
 
   let model;
   switch (role) {
@@ -89,7 +89,7 @@ export const getUserById = catchAsync(async (req, res, next) => {
     return next(new AppError('المستخدم غير موجود', 404));
   }
 
-  res.status(200).json({ status: 'success', data: { user } });
+  res.status(200).json({status: 'success', data: {user}});
 });
 
 /**
@@ -98,7 +98,7 @@ export const getUserById = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const createUser = catchAsync(async (req, res, next) => {
-  const { role, ...userData } = req.body;
+  const {role, ...userData} = req.body;
 
   let model;
   switch (role) {
@@ -119,7 +119,7 @@ export const createUser = catchAsync(async (req, res, next) => {
   const userResponse = user.toObject();
   delete userResponse.password;
 
-  res.status(201).json({ status: 'success', data: { user: userResponse } });
+  res.status(201).json({status: 'success', data: {user: userResponse}});
 });
 
 /**
@@ -128,7 +128,7 @@ export const createUser = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const updateUser = catchAsync(async (req, res, next) => {
-  const { role, id } = req.params;
+  const {role, id} = req.params;
 
   let model;
   switch (role) {
@@ -154,7 +154,7 @@ export const updateUser = catchAsync(async (req, res, next) => {
     return next(new AppError('المستخدم غير موجود', 404));
   }
 
-  res.status(200).json({ status: 'success', data: { user } });
+  res.status(200).json({status: 'success', data: {user}});
 });
 
 /**
@@ -163,7 +163,7 @@ export const updateUser = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const deleteUser = catchAsync(async (req, res, next) => {
-  const { role, id } = req.params;
+  const {role, id} = req.params;
 
   let model;
   switch (role) {
@@ -186,7 +186,7 @@ export const deleteUser = catchAsync(async (req, res, next) => {
     return next(new AppError('المستخدم غير موجود', 404));
   }
 
-  res.status(204).json({ status: 'success', data: null });
+  res.status(204).json({status: 'success', data: null});
 });
 
 /**
@@ -195,7 +195,7 @@ export const deleteUser = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const toggleUserStatus = catchAsync(async (req, res, next) => {
-  const { role, id } = req.params;
+  const {role, id} = req.params;
 
   let model;
   switch (role) {
@@ -227,7 +227,7 @@ export const toggleUserStatus = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     message: `تم ${user.isActive ? 'تفعيل' : 'تعطيل'} المستخدم بنجاح`,
-    data: { user: userResponse }
+    data: {user: userResponse}
   });
 });
 
@@ -237,8 +237,8 @@ export const toggleUserStatus = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const resetUserPassword = catchAsync(async (req, res, next) => {
-  const { role, id } = req.params;
-  const { newPassword } = req.body;
+  const {role, id} = req.params;
+  const {newPassword} = req.body;
 
   if (!newPassword) {
     return next(new AppError('كلمة المرور الجديدة مطلوبة', 400));
@@ -285,7 +285,7 @@ export const getUserStats = catchAsync(async (req, res, next) => {
       {
         $group: {
           _id: '$isActive',
-          count: { $sum: 1 }
+          count: {$sum: 1}
         }
       }
     ]),
@@ -293,7 +293,7 @@ export const getUserStats = catchAsync(async (req, res, next) => {
       {
         $group: {
           _id: '$isActive',
-          count: { $sum: 1 }
+          count: {$sum: 1}
         }
       }
     ]),
@@ -301,7 +301,7 @@ export const getUserStats = catchAsync(async (req, res, next) => {
       {
         $group: {
           _id: '$isActive',
-          count: { $sum: 1 }
+          count: {$sum: 1}
         }
       }
     ])
@@ -325,5 +325,5 @@ export const getUserStats = catchAsync(async (req, res, next) => {
     }
   };
 
-  res.status(200).json({ status: 'success', data: { stats } });
+  res.status(200).json({status: 'success', data: {stats}});
 });

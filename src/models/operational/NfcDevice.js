@@ -9,8 +9,8 @@ const nfcDeviceSchema = new mongoose.Schema({
     trim: true,
     uppercase: true,
     validate: {
-      validator: function(v) {
-        return /^[A-Z0-9]{3,10}-[A-Z0-9]{3,10}$/.test(v);
+      validator: function (v) {
+        return (/^[A-Z0-9]{3,10}-[A-Z0-9]{3,10}$/).test(v);
       },
       message: 'تنسيق معرف الجهاز غير صالح (مثال: NFC-001 أو LAB-A12)'
     }
@@ -33,7 +33,7 @@ const nfcDeviceSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'College',
     validate: {
-      validator: async function(collegeId) {
+      validator: async function (collegeId) {
         const college = await mongoose.model('College').findById(collegeId);
         return college && college.isActive;
       },
@@ -44,8 +44,8 @@ const nfcDeviceSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department',
     validate: {
-      validator: async function(deptId) {
-        if (!deptId) return true;
+      validator: async function (deptId) {
+        if (!deptId) { return true; }
         const dept = await mongoose.model('Department').findById(deptId);
         return dept && dept.isActive;
       },
@@ -79,22 +79,22 @@ const nfcDeviceSchema = new mongoose.Schema({
       ref: 'Admin'
     }
   }
-}, { 
+}, {
   timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toJSON: {virtuals: true},
+  toObject: {virtuals: true}
 });
 
 // Middleware لتوليد API Key قبل الحفظ
-nfcDeviceSchema.pre('save', function(next) {
-  if (!this.isNew) return next();
-  
+nfcDeviceSchema.pre('save', function (next) {
+  if (!this.isNew) { return next(); }
+
   // توليد API Key عشوائي
   this.apiKey = crypto.randomBytes(32).toString('hex');
-  
+
   // تحديد تاريخ انتهاء الصلاحية (سنة واحدة)
   this.apiKeyExpires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-  
+
   next();
 });
 
@@ -114,9 +114,8 @@ nfcDeviceSchema.virtual('departmentInfo', {
 });
 
 // Indexes
-nfcDeviceSchema.index({ deviceId: 1 }, { unique: true });
-nfcDeviceSchema.index({ location: 1 });
-nfcDeviceSchema.index({ assignedCollege: 1 });
-nfcDeviceSchema.index({ isActive: 1 });
+nfcDeviceSchema.index({location: 1});
+nfcDeviceSchema.index({assignedCollege: 1});
+nfcDeviceSchema.index({isActive: 1});
 
 export const NfcDevice = mongoose.model('NfcDevice', nfcDeviceSchema);

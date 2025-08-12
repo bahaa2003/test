@@ -5,9 +5,8 @@ const dailyReportSchema = new mongoose.Schema({
     type: Date,
     required: [true, 'تاريخ التقرير مطلوب'],
     unique: true,
-    index: true,
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         return v <= new Date();
       },
       message: 'لا يمكن إنشاء تقرير لتاريخ مستقبلي'
@@ -97,17 +96,16 @@ const dailyReportSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toJSON: {virtuals: true},
+  toObject: {virtuals: true}
 });
 
 // Indexes for faster querying
-dailyReportSchema.index({ date: 1 });
-dailyReportSchema.index({ 'collegeStats.college': 1 });
-dailyReportSchema.index({ 'collegeStats.departments.department': 1 });
+dailyReportSchema.index({'collegeStats.college': 1});
+dailyReportSchema.index({'collegeStats.departments.department': 1});
 
 // Virtual for formatted date
-dailyReportSchema.virtual('formattedDate').get(function() {
+dailyReportSchema.virtual('formattedDate').get(function () {
   return this.date.toISOString().split('T')[0];
 });
 

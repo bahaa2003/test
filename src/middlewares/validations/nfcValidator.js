@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { AppError } from '../../utils/AppError.js';
+import {AppError} from '../../utils/AppError.js';
 import moment from 'moment-timezone';
 
 export const validateNfcRegistration = (req, res, next) => {
@@ -43,8 +43,8 @@ export const validateNfcRegistration = (req, res, next) => {
       })
   });
 
-  const { error } = schema.validate(req.body);
-  if (error) return next(new AppError(error.details[0].message, 400));
+  const {error} = schema.validate(req.body);
+  if (error) { return next(new AppError(error.details[0].message, 400)); }
 
   next();
 };
@@ -74,8 +74,8 @@ export const validateNfcScan = (req, res, next) => {
       })
   });
 
-  const { error } = schema.validate(req.body);
-  if (error) return next(new AppError(error.details[0].message, 400));
+  const {error} = schema.validate(req.body);
+  if (error) { return next(new AppError(error.details[0].message, 400)); }
 
   // تحقق إضافي من أن التاريخ ليس في المستقبل
   if (moment(req.body.timestamp).isAfter(moment(), 'minute')) {
@@ -106,8 +106,8 @@ export const validateNfcQuery = (req, res, next) => {
       })
   });
 
-  const { error } = schema.validate(req.query);
-  if (error) return next(new AppError(error.details[0].message, 400));
+  const {error} = schema.validate(req.query);
+  if (error) { return next(new AppError(error.details[0].message, 400)); }
 
   next();
 };

@@ -11,7 +11,6 @@ export const optimizeDatabaseSettings = () => {
 
     // تحسين إعدادات الاتصال
     mongoose.set('bufferCommands', false);
-    mongoose.set('bufferMaxEntries', 0);
 
     // تحسين إعدادات الاستعلام
     mongoose.set('strictQuery', true);
@@ -33,7 +32,7 @@ export const cleanupOldData = async () => {
     // حذف سجلات الحضور القديمة (أكثر من 30 يوم)
     const Attendance = mongoose.model('Attendance');
     const result = await Attendance.deleteMany({
-      date: { $lt: thirtyDaysAgo }
+      date: {$lt: thirtyDaysAgo}
     });
 
     logger.info(`تم حذف ${result.deletedCount} سجل حضور قديم`);
