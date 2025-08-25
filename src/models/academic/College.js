@@ -34,9 +34,11 @@ const collegeSchema = new mongoose.Schema(
     dean: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Faculty',
-      required: true,
+      required: false,
+      default: null,
       validate: {
         validator: async function (v) {
+          if (!v || v === '') return true; // Allow null/undefined/empty string dean
           const faculty = await mongoose.model('Faculty').findById(v);
           return faculty && faculty.designation === 'professor';
         },
@@ -102,6 +104,14 @@ const collegeSchema = new mongoose.Schema(
     toObject: {virtuals: true}
   }
 );
+
+// Pre-save middleware to convert empty strings to null for ObjectId fields
+collegeSchema.pre('save', function(next) {
+  if (this.dean === '') {
+    this.dean = null;
+  }
+  next();
+});
 
 // Compound unique index for university + code
 collegeSchema.index({university: 1, code: 1}, {unique: true});

@@ -56,14 +56,12 @@ const facultySchema = new mongoose.Schema(
     college: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'College',
-      required: [true, 'يجب تحديد الكلية']
+      required: false // Allow creating faculty without college initially
     },
     department: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Department',
-      required: function () {
-        return this.role === 'faculty';
-      }
+      required: false // Allow creating faculty without department initially
     },
     specialization: {
       type: [String],
@@ -94,6 +92,10 @@ const facultySchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true
+    },
+    refreshToken: {
+      type: String,
+      select: false
     }
   },
   {timestamps: true}
@@ -115,6 +117,17 @@ facultySchema.virtual('sections', {
   ref: 'Section',
   localField: '_id',
   foreignField: 'faculty'
+});
+
+// Pre-save middleware to convert empty strings to null for ObjectId fields
+facultySchema.pre('save', function(next) {
+  if (this.college === '') {
+    this.college = null;
+  }
+  if (this.department === '') {
+    this.department = null;
+  }
+  next();
 });
 
 // Indexes

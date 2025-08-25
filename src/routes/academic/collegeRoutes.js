@@ -5,7 +5,8 @@ import {
   getCollegeById,
   updateCollege,
   deleteCollege,
-  getActiveColleges
+  getActiveColleges,
+  getCollegeStats
 } from '../../controllers/academic/collegeController.js';
 import {authenticate} from '../../middlewares/auth/authenticate.js';
 import {authorize} from '../../middlewares/auth/authorize.js';
@@ -19,14 +20,15 @@ router.use(authenticate);
 router
   .route('/')
   .get(getAllColleges)
-  .post(authorize(['admin']), createCollege);
+  .post(authorize(['system_admin', 'admin']), createCollege);
 
 router.get('/active', getActiveColleges);
+router.get('/stats', getCollegeStats);
 
 router
   .route('/:id')
   .get(getCollegeById)
-  .patch(authorize(['admin']), updateCollege)
-  .delete(authorize(['admin']), deleteCollege);
+  .patch(authorize(['system_admin', 'admin']), updateCollege)
+  .delete(authorize(['system_admin', 'admin']), deleteCollege);
 
 export default router;

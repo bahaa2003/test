@@ -1,5 +1,7 @@
 // الأدوار والصلاحيات
 export const ADMIN_ROLES = ['admin', 'superAdmin', 'collegeAdmin'];
+export const USER_ROLES = ['system_admin', 'admin', 'faculty', 'student'];
+export const SYSTEM_ADMIN_ROLES = ['system_admin'];
 export const FACULTY_DESIGNATIONS = [
   'professor',
   'associateProfessor',

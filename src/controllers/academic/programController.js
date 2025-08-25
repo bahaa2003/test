@@ -19,7 +19,7 @@ export const getAllPrograms = catchAsync(async (req, res, next) => {
     .limitFields()
     .paginate();
 
-  const programs = await features.query;
+  const programs = await features.mongooseQuery;
 
   res.status(200).json({
     status: 'success',
@@ -67,7 +67,7 @@ export const getProgramsByDepartment = catchAsync(async (req, res, next) => {
     .limitFields()
     .paginate();
 
-  const programs = await features.query;
+  const programs = await features.mongooseQuery;
 
   res.status(200).json({
     status: 'success',

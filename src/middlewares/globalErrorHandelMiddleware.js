@@ -1,5 +1,6 @@
 // middlewares/errorHandler.js
-import AppError from '../utils/AppError.js';
+import { AppError } from '../utils/AppError.js';
+import { logError } from '../utils/logger.js';
 
 const globalErrorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
@@ -18,7 +19,7 @@ const globalErrorHandler = (err, req, res, next) => {
         message: err.message
       });
     } else {
-      console.error('ERROR 💥', err);
+      logError('Unhandled application error', { error: err.message, stack: err.stack });
       res.status(500).json({
         status: 'error',
         message: 'Something went wrong!'

@@ -6,7 +6,7 @@
 export default {
   // إعدادات البيئة
   env: process.env.NODE_ENV || 'development',
-  port: process.env.PORT || 5000,
+  port: process.env.PORT || 5001,
   host: process.env.HOST || 'localhost',
 
   // إعدادات JWT

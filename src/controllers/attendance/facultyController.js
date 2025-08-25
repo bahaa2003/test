@@ -87,7 +87,7 @@ export const getFacultyAttendance = catchAsync(async (req, res, next) => {
     .sort()
     .paginate();
 
-  const attendance = await features.query;
+  const attendance = await features.mongooseQuery;
   const total = await Attendance.countDocuments(filterQuery);
 
   res.status(200).json({

@@ -10,13 +10,10 @@ import {ApiFeatures} from '../../utils/ApiFeatures.js';
  * @access  private (admin, faculty)
  */
 export const createSubject = catchAsync(async (req, res, next) => {
-  // التحقق من وجود القسم
-  const department = await Department.findById(req.body.departmentId);
-  if (!department) {
-    return next(new AppError('القسم غير موجود', 404));
-  }
-
-  const subject = await Subject.create(req.body);
+  const subject = await Subject.create({
+    ...req.body,
+    university: req.user.university
+  });
   res.status(201).json({status: 'success', data: {subject}});
 });
 
@@ -26,14 +23,17 @@ export const createSubject = catchAsync(async (req, res, next) => {
  * @access  public
  */
 export const getAllSubjects = catchAsync(async (req, res, next) => {
-  const features = new ApiFeatures(Subject.find().populate('departmentId', 'name code'), req.query)
+  const features = new ApiFeatures(
+    Subject.find({university: req.user.university}).populate('departmentId', 'name code'),
+    req.query
+  )
     .filter()
     .sort()
     .limitFields()
     .paginate();
 
-  const subjects = await features.query;
-  const total = await Subject.countDocuments(features.filterQuery);
+  const subjects = await features.mongooseQuery;
+  const total = await Subject.countDocuments({university: req.user.university});
 
   res.status(200).json({
     status: 'success',
@@ -49,7 +49,10 @@ export const getAllSubjects = catchAsync(async (req, res, next) => {
  * @access  public
  */
 export const getSubjectById = catchAsync(async (req, res, next) => {
-  const subject = await Subject.findById(req.params.id).populate('departmentId', 'name code');
+  const subject = await Subject.findOne({
+    _id: req.params.id,
+    university: req.user.university
+  }).populate('departmentId', 'name code');
 
   if (!subject) {
     return next(new AppError('المادة غير موجودة', 404));
@@ -64,18 +67,11 @@ export const getSubjectById = catchAsync(async (req, res, next) => {
  * @access  private (admin, faculty)
  */
 export const updateSubject = catchAsync(async (req, res, next) => {
-  // التحقق من القسم إذا تم تحديثه
-  if (req.body.departmentId) {
-    const department = await Department.findById(req.body.departmentId);
-    if (!department) {
-      return next(new AppError('القسم غير موجود', 404));
-    }
-  }
-
-  const subject = await Subject.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true
-  }).populate('departmentId', 'name code');
+  const subject = await Subject.findOneAndUpdate(
+    {_id: req.params.id, university: req.user.university},
+    req.body,
+    {new: true, runValidators: true}
+  ).populate('departmentId', 'name code');
 
   if (!subject) {
     return next(new AppError('المادة غير موجودة', 404));
@@ -90,7 +86,10 @@ export const updateSubject = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const deleteSubject = catchAsync(async (req, res, next) => {
-  const subject = await Subject.findByIdAndDelete(req.params.id);
+  const subject = await Subject.findOneAndDelete({
+    _id: req.params.id,
+    university: req.user.university
+  });
 
   if (!subject) {
     return next(new AppError('المادة غير موجودة', 404));
@@ -107,6 +106,7 @@ export const deleteSubject = catchAsync(async (req, res, next) => {
 export const getSubjectsByDepartment = catchAsync(async (req, res, next) => {
   const subjects = await Subject.find({
     departmentId: req.params.departmentId,
+    university: req.user.university,
     isActive: true
   }).select('name code credits description');
 
@@ -123,7 +123,10 @@ export const getSubjectsByDepartment = catchAsync(async (req, res, next) => {
  * @access  public
  */
 export const getActiveSubjects = catchAsync(async (req, res, next) => {
-  const subjects = await Subject.find({isActive: true})
+  const subjects = await Subject.find({
+    university: req.user.university,
+    isActive: true
+  })
     .populate('departmentId', 'name code')
     .select('name code credits departmentId');
 
@@ -147,12 +150,17 @@ export const searchSubjects = catchAsync(async (req, res, next) => {
   }
 
   const subjects = await Subject.find({
-    $or: [
-      {name: {$regex: q, $options: 'i'}},
-      {code: {$regex: q, $options: 'i'}},
-      {description: {$regex: q, $options: 'i'}}
-    ],
-    isActive: true
+    $and: [
+      {university: req.user.university},
+      {
+        $or: [
+          {name: {$regex: q, $options: 'i'}},
+          {code: {$regex: q, $options: 'i'}},
+          {description: {$regex: q, $options: 'i'}}
+        ]
+      },
+      {isActive: true}
+    ]
   }).populate('departmentId', 'name code');
 
   res.status(200).json({

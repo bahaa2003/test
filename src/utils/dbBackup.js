@@ -1,18 +1,23 @@
 // utils/dbBackup.js
-import {exec} from 'child_process';
-import moment from 'moment';
+import { exec } from 'child_process';
 import path from 'path';
+import fs from 'fs';
+import { logError, logInfo } from './logger.js';
 
-const backupDir = path.resolve('./backups');
-const dateStr = moment().format('YYYY-MM-DD_HH-mm');
-const backupPath = path.join(backupDir, `backup-${dateStr}.gz`);
+const backupDir = path.join(process.cwd(), 'backups');
 
-const command = `mongodump --uri="${process.env.MONGODB_URI}" --archive=${backupPath} --gzip`;
+if (!fs.existsSync(backupDir)) {
+  fs.mkdirSync(backupDir, { recursive: true });
+}
+
+const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+const backupPath = path.join(backupDir, `backup-${timestamp}.gz`);
+const command = `mongodump --uri="${process.env.MONGODB_URI}" --archive="${backupPath}" --gzip`;
 
 exec(command, (error) => {
   if (error) {
-    console.error('فشل النسخ الاحتياطي:', error);
+    logError('Database backup failed', { error: error.message, backupPath });
     process.exit(1);
   }
-  console.log(`تم إنشاء النسخ الاحتياطي في: ${backupPath}`);
+  logInfo(`Database backup created successfully at: ${backupPath}`);
 });

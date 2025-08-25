@@ -1,7 +1,9 @@
+import { logError } from './logger.js';
+
 /**
- * معالج الأخطاء للدوال غير المتزامنة
- * @param {Function} fn - الدالة المراد تنفيذها
- * @returns {Function} دالة معالجة الأخطاء
+ * Error handler for async functions
+ * @param {Function} fn - Function to execute
+ * @returns {Function} Error handling function
  */
 export const catchAsync = (fn) => {
   return (req, res, next) => {
@@ -10,17 +12,17 @@ export const catchAsync = (fn) => {
 };
 
 /**
- * معالج الأخطاء للدوال غير المتزامنة مع تسجيل الأخطاء
- * @param {Function} fn - الدالة المراد تنفيذها
- * @param {string} operation - اسم العملية للتسجيل
- * @returns {Function} دالة معالجة الأخطاء
+ * Error handler for async functions with logging
+ * @param {Function} fn - Function to execute
+ * @param {string} operation - Operation name for logging
+ * @returns {Function} Error handling function
  */
 export const catchAsyncWithLogging = (fn, operation = 'Unknown operation') => {
   return async (req, res, next) => {
     try {
       await fn(req, res, next);
     } catch (error) {
-      console.error(`Error in ${operation}:`, {
+      logError(`Error in ${operation}`, {
         error: error.message,
         stack: error.stack,
         url: req.originalUrl,

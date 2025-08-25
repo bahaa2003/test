@@ -4,7 +4,7 @@ import {SemesterReport} from '../models/report/SemesterReport.js';
 import {generatePDF} from './reportGenerators/pdfGenerator.js';
 import {sendEmailWithAttachment} from './emailService.js';
 import moment from 'moment';
-import logger from './logger.js';
+import logger, { logError, logInfo } from './logger.js';
 
 // جدولة التقرير اليومي الساعة 11 مساءً
 cron.schedule('0 23 * * *', async () => {
@@ -51,9 +51,9 @@ cron.schedule('0 23 * * *', async () => {
       }]
     });
 
-    logger.info(`تشغيل مولد التقارير اليومية... لـ ${moment(yesterday).format('YYYY-MM-DD')}`);
+    logInfo(`Daily report generator started for ${moment(yesterday).format('YYYY-MM-DD')}`);
   } catch (err) {
-    console.error('فشل في إنشاء التقرير اليومي:', err);
+    logError('Failed to generate daily report', { error: err.message, stack: err.stack });
   }
 });
 
@@ -73,9 +73,9 @@ cron.schedule('0 0 1 1,5,9 *', async () => {
     // تخزين التقرير في قاعدة البيانات
     await SemesterReport.create(report);
 
-    logger.info(`تشغيل مولد التقارير الفصلية... للفصل ${semester}`);
+    logInfo(`Semester report generator started for semester: ${semester}`);
   } catch (err) {
-    console.error('فشل في إنشاء التقرير الفصلي:', err);
+    logError('Failed to generate semester report', { error: err.message, stack: err.stack });
   }
 });
 

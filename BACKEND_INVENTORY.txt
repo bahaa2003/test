@@ -1,0 +1,407 @@
+# UNIVERSITY ATTENDANCE SYSTEM - BACKEND INVENTORY
+Generated: 2025-08-23T23:24:15+03:00
+Scope: Backend only (d:\projects\Att\backend\)
+
+## Project & Runtime
+
+**Node Version Compatibility**: >=18.0.0, npm >=9.0.0 (package.json:81-82)
+**Entry Point**: src/server.js (package.json:5)
+**Boot Flow**: 
+- src/server.js:1-28 → imports app.js, connects DB, creates indexes, starts monitoring, listens on port
+- src/app.js:1-154 → configures Express with security middleware, routes, error handling
+
+**Base API Prefix**: /api/v1 (app.js:114-118)
+**Health Endpoint**: GET /health → 200 JSON with status, message, timestamp, uptime (app.js:104-111)
+
+**Security Middleware Order** (app.js):
+1. helmet (lines 37-46) - CSP with self, unsafe-inline styles, self scripts, data/https images
+2. rateLimit (lines 49-60) - 15min window, 100 requests max, Arabic error message
+3. express.json/urlencoded (lines 63-64) - 10mb limit
+4. cookieParser (line 67)
+5. mongoSanitize (line 70)
+6. xss-clean (line 73)
+7. hpp (line 76)
+8. compression (line 79)
+
+**CORS Settings** (app.js:82-87):
+- Origin: process.env.CORS_ORIGIN || 'http://localhost:3000'
+- Credentials: true
+- Methods: GET, POST, PUT, PATCH, DELETE
+- Headers: Content-Type, Authorization
+
+**Rate Limiter Settings** (app.js:49-58):
+- Window: 15 minutes
+- Max: 100 requests per IP
+- Message: Arabic "تم تجاوز الحد الأقصى للطلبات، يرجى المحاولة لاحقاً"
+
+## Environment Variables
+
+**From config/config.js (lines 8-50)**:
+- NODE_ENV (default: 'development')
+- PORT (default: 5001)
+- HOST (default: 'localhost')
+- JWT_SECRET (default: 'fallback-secret-change-in-production')
+- JWT_EXPIRES_IN (default: '15m')
+- REFRESH_TOKEN_SECRET (default: 'fallback-refresh-secret')
+- REFRESH_TOKEN_EXPIRES_IN (default: '7d')
+- MONGODB_URI (default: 'mongodb://localhost:27017/attendance-system')
+- BCRYPT_ROUNDS (default: 12)
+- CORS_ORIGIN (default: 'http://localhost:3000')
+- LOG_LEVEL (default: 'info')
+- NFC_EXPIRY_YEARS (default: 4)
+- NFC_MAX_RETRIES (default: 3)
+
+**From utils/emailService.js (lines 11-16)**:
+- SMTP_HOST (default: 'smtp.gmail.com')
+- SMTP_PORT (default: 587)
+- SMTP_USER
+- SMTP_PASS
+
+## Routes & Endpoints
+
+### Authentication Routes (/api/v1/auth)
+**File**: src/routes/auth/authRoutes.js
+
+| Method | Path | Middleware | Controller | File |
+|--------|------|------------|------------|------|
+| POST | /auth/login | validateLogin | login | controllers/auth/authController.js |
+| POST | /auth/refresh | - | refreshToken | controllers/auth/authController.js |
+| POST | /auth/logout | authenticate | logout | controllers/auth/authController.js |
+| PATCH | /auth/update-password | authenticate, validateUpdatePassword | updatePassword | controllers/auth/authController.js |
+| GET | /auth/me | authenticate | getMe | controllers/auth/authController.js |
+| GET | /auth/profile | authenticate | getProfile | controllers/auth/userController.js |
+| PATCH | /auth/profile | authenticate | updateProfile | controllers/auth/userController.js |
+| DELETE | /auth/profile | authenticate | deleteProfile | controllers/auth/userController.js |
+| GET | /auth/profile/stats | authenticate | getProfileStats | controllers/auth/userController.js |
+| POST | /auth/profile/avatar | authenticate | uploadAvatar | controllers/auth/userController.js |
+
+### Academic Routes (/api/v1/academic)
+**Index File**: src/routes/academic/index.js
+
+#### Universities (/api/v1/academic/universities)
+**File**: src/routes/academic/universityRoutes.js
+
+| Method | Path | Middleware | Controller |
+|--------|------|------------|------------|
+| GET | /universities | authenticate | getAllUniversities |
+| POST | /universities | authenticate, authorize(['system_admin', 'admin']) | createUniversity |
+| GET | /universities/active | authenticate | getActiveUniversities |
+| GET | /universities/country/:country | authenticate | getUniversitiesByCountry |
+| GET | /universities/:id | authenticate | getUniversityById |
+| PATCH | /universities/:id | authenticate, authorize(['system_admin', 'admin']) | updateUniversity |
+| DELETE | /universities/:id | authenticate, authorize(['system_admin', 'admin']) | deleteUniversity |
+| PATCH | /universities/:id/toggle | authenticate, authorize(['system_admin', 'admin']) | toggleUniversityStatus |
+
+#### Colleges (/api/v1/academic/colleges)
+**File**: src/routes/academic/collegeRoutes.js
+
+| Method | Path | Middleware | Controller |
+|--------|------|------------|------------|
+| GET | /colleges | authenticate | getAllColleges |
+| POST | /colleges | authenticate, authorize(['system_admin', 'admin']) | createCollege |
+| GET | /colleges/active | authenticate | getActiveColleges |
+| GET | /colleges/stats | authenticate | getCollegeStats |
+| GET | /colleges/:id | authenticate | getCollegeById |
+| PATCH | /colleges/:id | authenticate, authorize(['system_admin', 'admin']) | updateCollege |
+| DELETE | /colleges/:id | authenticate, authorize(['system_admin', 'admin']) | deleteCollege |
+
+#### Departments (/api/v1/academic/departments)
+**File**: src/routes/academic/departmentRoutes.js
+
+| Method | Path | Middleware | Controller |
+|--------|------|------------|------------|
+| GET | /departments | authenticate | getAllDepartments |
+| POST | /departments | authenticate, authorize(['system_admin', 'admin']) | createDepartment |
+| GET | /departments/stats | authenticate | getDepartmentStats |
+| GET | /departments/active | authenticate | getActiveDepartments |
+| GET | /departments/college/:collegeId | authenticate | getDepartmentsByCollege |
+| GET | /departments/:id | authenticate | getDepartmentById |
+| PATCH | /departments/:id | authenticate, authorize(['system_admin', 'admin']) | updateDepartment |
+| DELETE | /departments/:id | authenticate, authorize(['system_admin', 'admin']) | deleteDepartment |
+
+#### Other Academic Routes
+- Programs: src/routes/academic/programRoutes.js
+- Subjects: src/routes/academic/subjectRoutes.js
+- Schedules: src/routes/academic/scheduleRoutes.js
+- Sections: src/routes/academic/sectionRoutes.js
+
+### Admin Routes (/api/v1/admin/users)
+**File**: src/routes/admin/userRoutes.js
+
+### Attendance Routes (/api/v1/attendance)
+**Index File**: src/routes/attendance/index.js
+- Faculty: /attendance/faculty
+- NFC: /attendance/nfc
+- Timeslots: /attendance/timeslots
+
+### Report Routes (/api/v1/reports)
+**Index File**: src/routes/report/index.js
+
+| Method | Path | Middleware | Controller |
+|--------|------|------------|------------|
+| GET | /reports/dashboard-stats | authenticate, authorize(['system_admin', 'admin']) | getSystemOverview |
+
+- Admin Reports: /reports/admin
+- Faculty Reports: /reports/faculty
+- Student Reports: /reports/student
+
+## Request Validation (Joi)
+
+### Authentication Validation
+**File**: src/middlewares/validations/authValidation.js
+
+**loginSchema** (lines 8-30):
+- email: string, email format, required
+- password: string, min 6 chars, required
+- role: string, valid values from USER_ROLES, required
+
+**updatePasswordSchema** (lines 35-57):
+- currentPassword: string, required
+- newPassword: string, min 6, pattern (uppercase + lowercase + digit), required
+- confirmPassword: string, must match newPassword, required
+
+**createUserSchema** (lines 62-101):
+- name: string, min 2, max 50, required
+- email: string, email format, required
+- password: string, min 6, pattern (uppercase + lowercase + digit), required
+- role: string, valid 'admin'|'faculty'|'student', required
+- phone: string, pattern /^[0-9+\-\s()]+$/, optional
+
+**updateUserSchema** (lines 106-129):
+- name: string, min 2, max 50, optional
+- email: string, email format, optional
+- phone: string, pattern /^[0-9+\-\s()]+$/, optional
+- isActive: boolean, optional
+
+**Note**: createUserSchema rejects 'system_admin' role (line 89), only allows 'admin', 'faculty', 'student'
+
+## Authentication & Authorization (RBAC)
+
+### Authentication
+**File**: src/middlewares/auth/authenticate.js
+- Checks Bearer token in Authorization header or accessToken cookie (lines 17-21)
+- Verifies JWT with config.jwt.secret (line 29)
+- Searches user in order: SystemAdmin → Admin → Faculty → Student (lines 32-56)
+- Sets user.role based on model found: 'system_admin', 'admin', 'faculty', 'student'
+- Validates user.isActive and passwordChangedAt (lines 63-73)
+
+### Authorization
+**File**: src/middlewares/auth/authorize.js
+- authorize(roles) - checks req.user.role in allowed roles array (lines 7-19)
+- checkOwnership() - allows system_admin/admin full access, others only own resources (lines 26-52)
+- canAccessStudent() - admin full access, faculty to their students, student to self (lines 57-84)
+- canAccessFaculty() - admin full access, faculty to self only (lines 90-117)
+
+### Accepted Roles
+From authenticate.js role assignment:
+- 'system_admin' (SystemAdmin model)
+- 'admin' (Admin model)
+- 'faculty' (Faculty model)
+- 'student' (Student model)
+
+### Token Structure
+**Files**: utils/auth/signToken.js, utils/auth/setTokenCookie.js
+- JWT payload: {id: user._id} (inferred from authenticate.js:29)
+- Access token: 15m expiry (config.js:15)
+- Refresh token: 7d expiry (config.js:17)
+- Cookies: accessToken, refreshToken (setTokenCookie.js)
+
+### RBAC Matrix
+**Universities**: system_admin, admin can CREATE/UPDATE/DELETE
+**Colleges**: system_admin, admin can CREATE/UPDATE/DELETE
+**Departments**: system_admin, admin can CREATE/UPDATE/DELETE
+**All other academic entities**: Follow same pattern
+**Reports/dashboard-stats**: system_admin, admin can access
+
+## Models & Schemas (Mongoose)
+
+### User Models
+
+#### SystemAdmin
+**File**: src/models/user/SystemAdmin.js
+**Collection**: systemadmins
+**Fields**:
+- name: String, required, trim
+- email: String, required, unique, immutable, lowercase, email validation
+- password: String, required, minlength 8, select false
+- role: String, default 'system_admin', immutable
+- permissions: Object with boolean flags (manageUniversities, manageSystemUsers, systemSettings, generateSystemReports, manageBackups) all default true
+- lastLogin: Date
+- isActive: Boolean, default true
+- refreshToken: String, select false
+**Options**: timestamps true, virtuals true
+**Hooks**: pre('save') bcrypt hash password with 12 rounds (line 66)
+**Methods**: comparePassword() using bcrypt.compare
+**Indexes**: {email: 1} unique, {isActive: 1}
+
+#### Admin
+**File**: src/models/user/Admin.js
+**Collection**: admins
+**Fields**:
+- name: String, required, trim
+- email: String, required, unique, immutable, lowercase, email validation
+- password: String, required, minlength 8, select false
+- contactNumber: String, required, pattern /^01[0-9]{9}$/
+- role: String, enum ADMIN_ROLES, default 'admin'
+- university: ObjectId ref 'University', required
+- college: ObjectId ref 'College', required
+- employeeId: String, required, unique, immutable
+- permissions: Object with boolean flags (manageUsers false, manageContent true, generateReports true, systemSettings false)
+- lastLogin: Date
+- isActive: Boolean, default true
+- refreshToken: String, select false
+**Options**: timestamps true, virtuals true
+**Hooks**: pre('save') bcrypt hash password with 12 rounds
+**Methods**: comparePassword() using bcrypt.compare
+**Indexes**: {university: 1}, {college: 1}, {isActive: 1}
+
+### Academic Models
+
+#### University
+**File**: src/models/academic/University.js
+**Collection**: universities
+**Fields**:
+- name: String, required, unique, trim, maxlength 100
+- code: String, required, unique, uppercase, pattern /^[A-Z]{2,4}$/
+- establishedYear: Number, required, min 1900, max current year
+- country: String, required, trim
+- city: String, required, trim
+- address: String, required, trim
+- contact: Object with phone (pattern validation), email (email validation), website (URL validation)
+- settings: Object with academicYearStart/End (MM-DD format), timezone (default 'Asia/Riyadh'), language (enum 'ar'|'en'|'ar-en', default 'ar')
+- isActive: Boolean, default true
+- lastUpdatedBy: ObjectId ref 'Admin'
+**Options**: timestamps true, virtuals true
+**Indexes**: {isActive: 1}, {country: 1, city: 1}
+**Virtuals**: collegesCount (count), colleges (populate)
+
+## Database Init / Seed / Scripts
+
+### Scripts Directory
+**Location**: /scripts/
+
+#### createTestAccounts.js
+**Lines 1-30 examined**:
+- Creates test university with code 'TEST_UNI'
+- Uses bcrypt for password hashing
+- Connects to MONGODB_URI || 'mongodb://localhost:27017/attendance_system'
+- Creates University, College, Department, SystemAdmin, Admin, Faculty, Student models
+
+#### Other Scripts
+- init-mongo.js (1647 bytes)
+- migrate.js (9794 bytes)
+- seed.js (15102 bytes)
+- setup.js (5017 bytes)
+
+**Password Hashing**: bcrypt with 12 rounds (SystemAdmin.js:66, Admin.js:84)
+
+## Services & Utilities
+
+### Email Service
+**File**: src/utils/emailService.js
+**SMTP Configuration** (lines 10-18):
+- Host: process.env.SMTP_HOST || 'smtp.gmail.com'
+- Port: process.env.SMTP_PORT || 587
+- Secure: false
+- Auth: SMTP_USER, SMTP_PASS from env
+
+### Logging
+**File**: src/utils/logger.js
+- Uses Winston
+- Level from process.env.LOG_LEVEL || 'info'
+
+### Other Utilities
+- dbIndexes.js - Database index creation
+- dbOptimization.js - Database monitoring and optimization
+- backupService.js - Database backup/restore
+- refreshTokens.js - Token refresh logic
+
+## Error Handling
+
+**Global Error Handler**: src/middlewares/errorHandler.js
+**Not Found Handler**: src/middlewares/errorHandler.js (notFound function)
+**Custom Errors**: src/utils/AppError.js
+**Async Wrapper**: src/utils/catchAsync.js
+
+**Error Response Format**: JSON with status, message fields (inferred from validation responses)
+
+## Postman Collection Cross-Check
+
+**File**: University_Attendance_System.postman_collection.json
+**Collection ID**: "university-attendance-system"
+**Name**: "University Attendance System API"
+
+**Authentication Section** (lines 10-50):
+- Login - System Admin: POST {{baseUrl}}/auth/login with system_admin role
+- Login - University Admin: POST {{baseUrl}}/auth/login
+- Auto-sets token and refreshToken environment variables
+
+**Environment Variables in Collection**:
+- baseUrl
+- token
+- refreshToken
+
+## Gaps / Missing / Inconsistencies
+
+### Route Coverage Gaps
+- Faculty routes exist in attendance/facultyRoutes.js but not examined for CRUD completeness
+- NFC routes exist but not detailed
+- Program, Subject, Schedule, Section routes exist but not detailed
+- Admin user management routes exist but not detailed
+
+### Validation vs Controller Mismatches
+- createUserSchema rejects 'system_admin' role but system can create system_admin users
+- Role validation in loginSchema allows all USER_ROLES but createUserSchema is more restrictive
+
+### Missing CRUD Operations
+- No DELETE operations visible for most academic entities in routes examined
+- Stats endpoints exist for colleges/departments but not for all entities
+
+### Authorization Inconsistencies
+- Some routes missing system_admin in authorize() calls (need full audit)
+- canAccessStudent() allows faculty access to "their students" but logic is commented as TODO
+
+## Quick Repro & Health
+
+**Dev Server Command**: npm run dev (package.json:9) - uses nodemon
+**Production Command**: npm start (package.json:8) - uses node
+**Health Check**: GET /health → 200 JSON with status, uptime
+**MongoDB Connection**: Default mongodb://localhost:27017/attendance-system
+**Common Failure**: ECONNREFUSED on 127.0.0.1:27017 (MongoDB not running)
+
+## Dependency & Scripts Summary
+
+### Dependencies (package.json:42-66)
+**Security**: helmet@^8.0.0, cors@^2.8.5, express-rate-limit@^7.5.0, express-mongo-sanitize@^2.2.0, xss-clean@^0.1.4, hpp@^0.2.3
+**Auth**: bcryptjs@^2.4.3, jsonwebtoken@^9.0.2, cookie-parser@^1.4.7
+**Database**: mongoose@^8.9.5
+**Validation**: joi@^17.12.2
+**Email**: nodemailer@^6.10.0
+**Logging**: winston@^3.13.0
+**Utilities**: compression@^1.8.1, dotenv@^16.4.7, multer@^2.0.2, moment-timezone@^0.5.45, moment-hijri@^2.0.0
+**Reporting**: exceljs@^4.4.0, pdfkit@^0.14.0
+**Real-time**: socket.io@^4.8.1
+**Scheduling**: node-cron@^3.0.3
+
+### Dev Dependencies (package.json:68-78)
+**Testing**: jest@^29.7.0, supertest@^7.0.0
+**Development**: nodemon@^3.1.9, eslint@^9.17.0, prettier@^3.3.3
+**Types**: @types/* packages for TypeScript support
+
+### NPM Scripts (package.json:7-27)
+- start: node src/server.js
+- dev: nodemon src/server.js
+- setup: node scripts/setup.js
+- test: jest (with watch, coverage, stress variants)
+- lint: eslint . (with fix option)
+- format: prettier --write .
+- db:index: node ./src/utils/dbIndexes.js
+- db:backup/restore: node ./src/utils/backupService.js
+- health: node healthcheck.js
+
+**Engine Requirements**: Node >=18.0.0, npm >=9.0.0
+
+---
+**Total Files Examined**: 23 route files, 26 model files, key config/middleware/utility files
+**Audit Completeness**: Core structure documented, detailed CRUD operations need individual route file examination
+**Last Updated**: 2025-08-23T23:24:15+03:00

@@ -58,7 +58,7 @@ export class ApiFeatures {
   /**
    * تحديد الحقول المطلوبة
    */
-  fields () {
+  limitFields () {
     if (this.queryString.fields) {
       const fields = this.queryString.fields.split(',').join(' ');
       this.mongooseQuery = this.mongooseQuery.select(fields);

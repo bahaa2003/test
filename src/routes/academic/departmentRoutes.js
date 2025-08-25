@@ -6,7 +6,8 @@ import {
   updateDepartment,
   deleteDepartment,
   getDepartmentsByCollege,
-  getActiveDepartments
+  getActiveDepartments,
+  getDepartmentStats
 } from '../../controllers/academic/departmentController.js';
 import {authenticate} from '../../middlewares/auth/authenticate.js';
 import {authorize} from '../../middlewares/auth/authorize.js';
@@ -20,15 +21,16 @@ router.use(authenticate);
 router
   .route('/')
   .get(getAllDepartments)
-  .post(authorize(['admin']), createDepartment);
+  .post(authorize(['system_admin', 'admin']), createDepartment);
 
+router.get('/stats', getDepartmentStats);
 router.get('/active', getActiveDepartments);
 router.get('/college/:collegeId', getDepartmentsByCollege);
 
 router
   .route('/:id')
   .get(getDepartmentById)
-  .patch(authorize(['admin']), updateDepartment)
-  .delete(authorize(['admin']), deleteDepartment);
+  .patch(authorize(['system_admin', 'admin']), updateDepartment)
+  .delete(authorize(['system_admin', 'admin']), deleteDepartment);
 
 export default router;

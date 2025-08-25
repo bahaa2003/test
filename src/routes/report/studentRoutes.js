@@ -12,16 +12,15 @@ import {authorize} from '../../middlewares/auth/authorize.js';
 
 const router = express.Router();
 
-// تطبيق middleware للمصادقة والتفويض على جميع المسارات
+// تطبيق middleware للمصادقة على جميع المسارات
 router.use(authenticate);
-router.use(authorize(['student', 'faculty', 'admin']));
 
 // مسارات تقارير الطلاب
-router.get('/attendance', getStudentAttendanceReport);
-router.get('/subjects', getStudentSubjectsReport);
-router.get('/subject/:subjectId', getStudentSubjectReport);
-router.get('/daily', getStudentDailyReport);
-router.get('/monthly', getStudentMonthlyReport);
-router.get('/overview', getStudentOverview);
+router.get('/attendance', authorize(['student', 'faculty', 'admin']), getStudentAttendanceReport);
+router.get('/subjects', authorize(['student', 'faculty', 'admin']), getStudentSubjectsReport);
+router.get('/subject/:subjectId', authorize(['student', 'faculty', 'admin']), getStudentSubjectReport);
+router.get('/daily', authorize(['student', 'faculty', 'admin']), getStudentDailyReport);
+router.get('/monthly', authorize(['student', 'faculty', 'admin']), getStudentMonthlyReport);
+router.get('/overview', authorize(['student', 'faculty', 'admin']), getStudentOverview);
 
 export default router;

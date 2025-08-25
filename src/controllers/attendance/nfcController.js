@@ -30,8 +30,8 @@ export const getAllNfcDevices = catchAsync(async (req, res, next) => {
     .limitFields()
     .paginate();
 
-  const devices = await features.query;
-  const total = await NfcDevice.countDocuments(features.filterQuery);
+  const devices = await features.mongooseQuery;
+  const total = await NfcDevice.countDocuments();
 
   res.status(200).json({
     status: 'success',
@@ -215,7 +215,7 @@ export const getNfcAttendanceRecords = catchAsync(async (req, res, next) => {
     .sort()
     .paginate();
 
-  const records = await features.query;
+  const records = await features.mongooseQuery;
   const total = await Attendance.countDocuments(filterQuery);
 
   res.status(200).json({

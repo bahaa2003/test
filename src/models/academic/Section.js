@@ -21,7 +21,7 @@ const sectionSchema = new mongoose.Schema(
     faculty: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Faculty',
-      required: [true, 'المحاضر المسؤول مطلوب']
+      required: false // Allow creating sections without faculty initially
     },
     students: [
       {
@@ -52,6 +52,20 @@ const sectionSchema = new mongoose.Schema(
     timestamps: true
   }
 );
+
+// Pre-save middleware to convert empty strings to null for ObjectId fields
+sectionSchema.pre('save', function(next) {
+  if (this.faculty === '') {
+    this.faculty = null;
+  }
+  if (this.college === '') {
+    this.college = null;
+  }
+  if (this.department === '') {
+    this.department = null;
+  }
+  next();
+});
 
 // فهرسة على الكود عشان يكون فريد
 sectionSchema.index({ code: 1 }, { unique: true, background: true });

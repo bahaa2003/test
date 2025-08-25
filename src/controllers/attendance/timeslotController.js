@@ -29,10 +29,10 @@ export const getAllTimeSlots = catchAsync(async (req, res, next) => {
     .filter()
     .search(['name', 'description'])
     .sort()
-    .fields()
+    .limitFields()
     .paginate();
 
-  const timeSlots = await features.query;
+  const timeSlots = await features.mongooseQuery;
   const stats = await features.getPaginationStats();
 
   res.status(200).json({

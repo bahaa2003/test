@@ -11,6 +11,7 @@ import {
 } from '../../controllers/academic/subjectController.js';
 import {authenticate} from '../../middlewares/auth/authenticate.js';
 import {authorize} from '../../middlewares/auth/authorize.js';
+import {validateSubject} from '../../middlewares/validations/academicValidation.js';
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ router.use(authenticate);
 router
   .route('/')
   .get(getAllSubjects)
-  .post(authorize(['admin', 'faculty']), createSubject);
+  .post(authorize(['system_admin', 'admin']), validateSubject, createSubject);
 
 router.get('/active', getActiveSubjects);
 router.get('/search', searchSubjects);
@@ -30,7 +31,7 @@ router.get('/department/:departmentId', getSubjectsByDepartment);
 router
   .route('/:id')
   .get(getSubjectById)
-  .patch(authorize(['admin', 'faculty']), updateSubject)
-  .delete(authorize(['admin']), deleteSubject);
+  .patch(authorize(['system_admin', 'admin']), validateSubject, updateSubject)
+  .delete(authorize(['system_admin', 'admin']), deleteSubject);
 
 export default router;

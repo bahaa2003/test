@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import {USER_ROLES} from '../../config/constants.js';
 
 /**
  * مخطط التحقق من تسجيل الدخول
@@ -17,6 +18,13 @@ export const loginSchema = Joi.object({
     .messages({
       'string.min': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
       'any.required': 'كلمة المرور مطلوبة'
+    }),
+  role: Joi.string()
+    .valid(...USER_ROLES)
+    .required()
+    .messages({
+      'any.only': 'دور المستخدم يجب أن يكون system_admin أو admin أو faculty أو student',
+      'any.required': 'دور المستخدم مطلوب'
     })
 });
 
@@ -48,7 +56,7 @@ export const updatePasswordSchema = Joi.object({
 });
 
 /**
- * مخطط التحقق من إنشاء مستخدم جديد
+ * مخطط التحقق من إنشاء مستخدم جديد (للواجهات العادية - يمنع إنشاء system_admin)
  */
 export const createUserSchema = Joi.object({
   name: Joi.string()
@@ -81,6 +89,50 @@ export const createUserSchema = Joi.object({
     .required()
     .messages({
       'any.only': 'الدور يجب أن يكون admin أو faculty أو student',
+      'any.required': 'الدور مطلوب'
+    }),
+  phone: Joi.string()
+    .pattern(/^[0-9+\-\s()]+$/)
+    .optional()
+    .messages({
+      'string.pattern.base': 'رقم الهاتف غير صحيح'
+    })
+});
+
+/**
+ * مخطط التحقق من إنشاء مستخدم للسكريبت والإعداد الأولي (يسمح بإنشاء system_admin)
+ */
+export const createUserSchemaForSetup = Joi.object({
+  name: Joi.string()
+    .min(2)
+    .max(50)
+    .required()
+    .messages({
+      'string.min': 'الاسم يجب أن يكون حرفين على الأقل',
+      'string.max': 'الاسم يجب أن يكون 50 حرف كحد أقصى',
+      'any.required': 'الاسم مطلوب'
+    }),
+  email: Joi.string()
+    .email()
+    .required()
+    .messages({
+      'string.email': 'البريد الإلكتروني غير صحيح',
+      'any.required': 'البريد الإلكتروني مطلوب'
+    }),
+  password: Joi.string()
+    .min(6)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .required()
+    .messages({
+      'string.min': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
+      'string.pattern.base': 'كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم',
+      'any.required': 'كلمة المرور مطلوبة'
+    }),
+  role: Joi.string()
+    .valid(...USER_ROLES)
+    .required()
+    .messages({
+      'any.only': 'الدور يجب أن يكون system_admin أو admin أو faculty أو student',
       'any.required': 'الدور مطلوب'
     }),
   phone: Joi.string()
@@ -148,10 +200,24 @@ export const validateUpdatePassword = (req, res, next) => {
 };
 
 /**
- * middleware للتحقق من صحة بيانات إنشاء مستخدم
+ * middleware للتحقق من صحة بيانات إنشاء مستخدم (للواجهات العادية)
  */
 export const validateCreateUser = (req, res, next) => {
   const {error} = createUserSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({
+      status: 'error',
+      message: error.details[0].message
+    });
+  }
+  next();
+};
+
+/**
+ * middleware للتحقق من صحة بيانات إنشاء مستخدم (للسكريبت والإعداد الأولي)
+ */
+export const validateCreateUserForSetup = (req, res, next) => {
+  const {error} = createUserSchemaForSetup.validate(req.body);
   if (error) {
     return res.status(400).json({
       status: 'error',

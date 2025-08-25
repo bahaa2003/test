@@ -20,13 +20,13 @@ router.use(authenticate);
 router
   .route('/')
   .get(getAllPrograms)
-  .post(authorize(['admin']), validateProgram, createProgram);
+  .post(authorize(['system_admin', 'admin']), validateProgram, createProgram);
 
 router
   .route('/:id')
   .get(getProgramById)
-  .patch(authorize(['admin']), validateProgram, updateProgram)
-  .delete(authorize(['admin']), deleteProgram);
+  .patch(authorize(['system_admin', 'admin']), validateProgram, updateProgram)
+  .delete(authorize(['system_admin', 'admin']), deleteProgram);
 
 // مسار للحصول على برامج قسم معين
 router.get('/department/:departmentId', getProgramsByDepartment);

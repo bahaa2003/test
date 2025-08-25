@@ -9,7 +9,13 @@ import {ApiFeatures} from '../../utils/ApiFeatures.js';
  * @access  private (admin)
  */
 export const createCollege = catchAsync(async (req, res, next) => {
-  const college = await College.create(req.body);
+  // Clean empty string ObjectId fields before validation
+  const collegeData = { ...req.body };
+  if (collegeData.dean === '') {
+    collegeData.dean = null;
+  }
+  
+  const college = await College.create(collegeData);
   res.status(201).json({status: 'success', data: {college}});
 });
 
@@ -25,8 +31,8 @@ export const getAllColleges = catchAsync(async (req, res, next) => {
     .limitFields()
     .paginate();
 
-  const colleges = await features.query;
-  const total = await College.countDocuments(features.filterQuery);
+  const colleges = await features.mongooseQuery;
+  const total = await College.countDocuments();
 
   res.status(200).json({
     status: 'success',
@@ -57,7 +63,13 @@ export const getCollegeById = catchAsync(async (req, res, next) => {
  * @access  private (admin)
  */
 export const updateCollege = catchAsync(async (req, res, next) => {
-  const college = await College.findByIdAndUpdate(req.params.id, req.body, {
+  // Clean empty string ObjectId fields before validation
+  const updateData = { ...req.body };
+  if (updateData.dean === '') {
+    updateData.dean = null;
+  }
+  
+  const college = await College.findByIdAndUpdate(req.params.id, updateData, {
     new: true,
     runValidators: true
   });
@@ -96,5 +108,53 @@ export const getActiveColleges = catchAsync(async (req, res, next) => {
     status: 'success',
     results: colleges.length,
     data: {colleges}
+  });
+});
+
+/**
+ * @desc    Get college statistics
+ * @route   GET /api/v1/academic/colleges/stats
+ * @access  Public
+ */
+export const getCollegeStats = catchAsync(async (req, res, next) => {
+  const totalColleges = await College.countDocuments();
+  const activeColleges = await College.countDocuments({isActive: true});
+  const inactiveColleges = totalColleges - activeColleges;
+
+  // Get colleges by university
+  const collegesByUniversity = await College.aggregate([
+    {
+      $group: {
+        _id: '$university',
+        count: {$sum: 1}
+      }
+    },
+    {
+      $lookup: {
+        from: 'universities',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'university'
+      }
+    },
+    {
+      $unwind: '$university'
+    },
+    {
+      $project: {
+        universityName: '$university.name',
+        count: 1
+      }
+    }
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      totalColleges,
+      activeColleges,
+      inactiveColleges,
+      collegesByUniversity
+    }
   });
 });

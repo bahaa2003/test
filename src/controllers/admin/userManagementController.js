@@ -49,7 +49,7 @@ export const getAllUsers = catchAsync(async (req, res, next) => {
     .limitFields()
     .paginate();
 
-  const users = await features.query.select('-password');
+  const users = await features.mongooseQuery.select('-password');
   const total = await model.countDocuments(query);
 
   res.status(200).json({
@@ -100,6 +100,10 @@ export const getUserById = catchAsync(async (req, res, next) => {
 export const createUser = catchAsync(async (req, res, next) => {
   const {role, ...userData} = req.body;
 
+  // Clean empty string ObjectId fields before validation
+  if (userData.college === '') userData.college = null;
+  if (userData.department === '') userData.department = null;
+
   let model;
   switch (role) {
     case 'admin':
@@ -130,6 +134,11 @@ export const createUser = catchAsync(async (req, res, next) => {
 export const updateUser = catchAsync(async (req, res, next) => {
   const {role, id} = req.params;
 
+  // Clean empty string ObjectId fields before validation
+  const updateData = { ...req.body };
+  if (updateData.college === '') updateData.college = null;
+  if (updateData.department === '') updateData.department = null;
+
   let model;
   switch (role) {
     case 'admin':
@@ -145,7 +154,7 @@ export const updateUser = catchAsync(async (req, res, next) => {
       return next(new AppError('دور المستخدم غير صحيح', 400));
   }
 
-  const user = await model.findByIdAndUpdate(id, req.body, {
+  const user = await model.findByIdAndUpdate(id, updateData, {
     new: true,
     runValidators: true
   }).select('-password');

@@ -27,29 +27,6 @@ const getUserModel = (role) => {
 };
 
 /**
- * دالة للبحث عن المستخدم في جميع النماذج
- */
-const findUserInAllModels = async (userId) => {
-  // البحث في SystemAdmin أولاً
-  let user = await SystemAdmin.findById(userId);
-  if (user) return {user, model: SystemAdmin, role: 'system_admin'};
-
-  // البحث في Admin
-  user = await Admin.findById(userId);
-  if (user) return {user, model: Admin, role: 'admin'};
-
-  // البحث في Faculty
-  user = await Faculty.findById(userId);
-  if (user) return {user, model: Faculty, role: 'faculty'};
-
-  // البحث في Student
-  user = await Student.findById(userId);
-  if (user) return {user, model: Student, role: 'student'};
-
-  return null;
-};
-
-/**
  * @desc    تسجيل الدخول
  * @route   POST /api/v1/auth/login
  * @access  public
@@ -63,9 +40,19 @@ export const login = catchAsync(async (req, res, next) => {
   }
 
   // تحديد النموذج حسب الدور
-  const UserModel = getUserModel(role);
-  if (!UserModel) {
-    return next(new AppError('دور المستخدم غير صحيح', 400));
+  let UserModel;
+  switch (role) {
+    case 'admin':
+      UserModel = Admin;
+      break;
+    case 'faculty':
+      UserModel = Faculty;
+      break;
+    case 'student':
+      UserModel = Student;
+      break;
+    default:
+      return next(new AppError('دور المستخدم غير صحيح', 400));
   }
 
   // البحث عن المستخدم
@@ -83,11 +70,9 @@ export const login = catchAsync(async (req, res, next) => {
   const accessToken = signToken(user._id, role);
   const refreshToken = signToken(user._id, role, 'refresh');
 
-  // حفظ التوكن في قاعدة البيانات (فقط للنماذج التي تدعم refreshToken)
-  if (role === 'system_admin' || user.refreshToken !== undefined) {
-    user.refreshToken = refreshToken;
-    await user.save();
-  }
+  // حفظ التوكن في قاعدة البيانات
+  user.refreshToken = refreshToken;
+  await user.save();
 
   // إزالة كلمة المرور من الاستجابة
   user.password = undefined;
@@ -117,9 +102,19 @@ export const logout = catchAsync(async (req, res, next) => {
   const {role} = req.user;
 
   // تحديد النموذج حسب الدور
-  const UserModel = getUserModel(role);
-  if (!UserModel) {
-    return next(new AppError('دور المستخدم غير صحيح', 400));
+  let UserModel;
+  switch (role) {
+    case 'admin':
+      UserModel = Admin;
+      break;
+    case 'faculty':
+      UserModel = Faculty;
+      break;
+    case 'student':
+      UserModel = Student;
+      break;
+    default:
+      return next(new AppError('دور المستخدم غير صحيح', 400));
   }
 
   // إزالة التوكن من قاعدة البيانات
@@ -152,9 +147,19 @@ export const updatePassword = catchAsync(async (req, res, next) => {
   }
 
   // تحديد النموذج حسب الدور
-  const UserModel = getUserModel(role);
-  if (!UserModel) {
-    return next(new AppError('دور المستخدم غير صحيح', 400));
+  let UserModel;
+  switch (role) {
+    case 'admin':
+      UserModel = Admin;
+      break;
+    case 'faculty':
+      UserModel = Faculty;
+      break;
+    case 'student':
+      UserModel = Student;
+      break;
+    default:
+      return next(new AppError('دور المستخدم غير صحيح', 400));
   }
 
   // البحث عن المستخدم مع كلمة المرور
@@ -198,18 +203,31 @@ export const refreshToken = catchAsync(async (req, res, next) => {
     // التحقق من التوكن
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
-    // البحث عن المستخدم في جميع النماذج
-    const result = await findUserInAllModels(decoded.id);
-    
-    if (!result || result.user.refreshToken !== refreshToken) {
+    // البحث عن المستخدم
+    let user;
+    let UserModel;
+
+    // محاولة العثور على المستخدم في جميع النماذج
+    user = await Admin.findById(decoded.id);
+    if (user) { UserModel = Admin; }
+
+    if (!user) {
+      user = await Faculty.findById(decoded.id);
+      if (user) { UserModel = Faculty; }
+    }
+
+    if (!user) {
+      user = await Student.findById(decoded.id);
+      if (user) { UserModel = Student; }
+    }
+
+    if (!user || user.refreshToken !== refreshToken) {
       return next(new AppError('توكن التحديث غير صالح', 401));
     }
 
-    const {user, model: UserModel, role} = result;
-
     // إنشاء توكن جديد
-    const newAccessToken = signToken(user._id, role);
-    const newRefreshToken = signToken(user._id, role, 'refresh');
+    const newAccessToken = signToken(user._id, user.role);
+    const newRefreshToken = signToken(user._id, user.role, 'refresh');
 
     // تحديث التوكن في قاعدة البيانات
     user.refreshToken = newRefreshToken;
@@ -246,9 +264,19 @@ export const getMe = catchAsync(async (req, res, next) => {
   const {role} = req.user;
 
   // تحديد النموذج حسب الدور
-  const UserModel = getUserModel(role);
-  if (!UserModel) {
-    return next(new AppError('دور المستخدم غير صحيح', 400));
+  let UserModel;
+  switch (role) {
+    case 'admin':
+      UserModel = Admin;
+      break;
+    case 'faculty':
+      UserModel = Faculty;
+      break;
+    case 'student':
+      UserModel = Student;
+      break;
+    default:
+      return next(new AppError('دور المستخدم غير صحيح', 400));
   }
 
   // البحث عن المستخدم

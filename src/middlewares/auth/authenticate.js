@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import {SystemAdmin} from '../../models/user/SystemAdmin.js';
 import {Admin} from '../../models/user/Admin.js';
 import {Faculty} from '../../models/user/Faculty.js';
 import {Student} from '../../models/user/Student.js';
@@ -28,9 +29,16 @@ export const authenticate = catchAsync(async (req, res, next) => {
     const decoded = jwt.verify(token, config.jwt.secret);
 
     // البحث عن المستخدم في جميع النماذج
-    let user = await Admin.findById(decoded.id);
+    let user = await SystemAdmin.findById(decoded.id);
     if (user) {
-      user.role = 'admin';
+      user.role = 'system_admin';
+    }
+
+    if (!user) {
+      user = await Admin.findById(decoded.id);
+      if (user) {
+        user.role = 'admin';
+      }
     }
 
     if (!user) {

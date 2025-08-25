@@ -12,8 +12,18 @@ import reportService from '../../services/reportService.js';
  * @access  private (student)
  */
 export const getStudentAttendanceReport = catchAsync(async (req, res, next) => {
-  const {startDate, endDate, subjectId} = req.query;
-  const studentId = req.user._id;
+  const {startDate, endDate, subjectId, studentId: requestedStudentId} = req.query;
+  
+  // Students can only access their own data
+  let studentId = req.user._id;
+  if (req.user.role === 'student' && requestedStudentId && !req.user._id.equals(requestedStudentId)) {
+    return next(new AppError('غير مصرح لك بالوصول لبيانات طالب آخر', 403));
+  }
+  
+  // Admin and faculty can access any student's data
+  if ((req.user.role === 'admin' || req.user.role === 'faculty') && requestedStudentId) {
+    studentId = requestedStudentId;
+  }
 
   const filterQuery = {
     studentId,
@@ -80,7 +90,18 @@ export const getStudentAttendanceReport = catchAsync(async (req, res, next) => {
  * @access  private (student)
  */
 export const getStudentSubjectsReport = catchAsync(async (req, res, next) => {
-  const studentId = req.user._id;
+  const {studentId: requestedStudentId} = req.query;
+  
+  // Students can only access their own data
+  let studentId = req.user._id;
+  if (req.user.role === 'student' && requestedStudentId && !req.user._id.equals(requestedStudentId)) {
+    return next(new AppError('غير مصرح لك بالوصول لبيانات طالب آخر', 403));
+  }
+  
+  // Admin and faculty can access any student's data
+  if ((req.user.role === 'admin' || req.user.role === 'faculty') && requestedStudentId) {
+    studentId = requestedStudentId;
+  }
 
   // الحصول على المواد المسجل فيها الطالب
   const subjectsData = await Attendance.aggregate([
@@ -168,8 +189,18 @@ export const getStudentSubjectsReport = catchAsync(async (req, res, next) => {
  */
 export const getStudentSubjectReport = catchAsync(async (req, res, next) => {
   const {subjectId} = req.params;
-  const {startDate, endDate} = req.query;
-  const studentId = req.user._id;
+  const {startDate, endDate, studentId: requestedStudentId} = req.query;
+  
+  // Students can only access their own data
+  let studentId = req.user._id;
+  if (req.user.role === 'student' && requestedStudentId && !req.user._id.equals(requestedStudentId)) {
+    return next(new AppError('غير مصرح لك بالوصول لبيانات طالب آخر', 403));
+  }
+  
+  // Admin and faculty can access any student's data
+  if ((req.user.role === 'admin' || req.user.role === 'faculty') && requestedStudentId) {
+    studentId = requestedStudentId;
+  }
 
   // البحث عن الجداول التي تحتوي على هذه المادة
   const schedules = await Schedule.find({subjectId, isActive: true});
@@ -241,8 +272,18 @@ export const getStudentSubjectReport = catchAsync(async (req, res, next) => {
  * @access  private (student)
  */
 export const getStudentDailyReport = catchAsync(async (req, res, next) => {
-  const {date} = req.query;
-  const studentId = req.user._id;
+  const {date, studentId: requestedStudentId} = req.query;
+  
+  // Students can only access their own data
+  let studentId = req.user._id;
+  if (req.user.role === 'student' && requestedStudentId && !req.user._id.equals(requestedStudentId)) {
+    return next(new AppError('غير مصرح لك بالوصول لبيانات طالب آخر', 403));
+  }
+  
+  // Admin and faculty can access any student's data
+  if ((req.user.role === 'admin' || req.user.role === 'faculty') && requestedStudentId) {
+    studentId = requestedStudentId;
+  }
 
   const reportDate = date ? new Date(date) : new Date();
   const startOfDay = new Date(reportDate);
@@ -306,8 +347,18 @@ export const getStudentDailyReport = catchAsync(async (req, res, next) => {
  * @access  private (student)
  */
 export const getStudentMonthlyReport = catchAsync(async (req, res, next) => {
-  const {year, month} = req.query;
-  const studentId = req.user._id;
+  const {year, month, studentId: requestedStudentId} = req.query;
+  
+  // Students can only access their own data
+  let studentId = req.user._id;
+  if (req.user.role === 'student' && requestedStudentId && !req.user._id.equals(requestedStudentId)) {
+    return next(new AppError('غير مصرح لك بالوصول لبيانات طالب آخر', 403));
+  }
+  
+  // Admin and faculty can access any student's data
+  if ((req.user.role === 'admin' || req.user.role === 'faculty') && requestedStudentId) {
+    studentId = requestedStudentId;
+  }
 
   const startDate = new Date(year || new Date().getFullYear(), month ? month - 1 : new Date().getMonth(), 1);
   const endDate = new Date(year || new Date().getFullYear(), month ? month : new Date().getMonth() + 1, 0);
@@ -430,7 +481,18 @@ export const getStudentMonthlyReport = catchAsync(async (req, res, next) => {
  * @access  private (student)
  */
 export const getStudentOverview = catchAsync(async (req, res, next) => {
-  const studentId = req.user._id;
+  const {studentId: requestedStudentId} = req.query;
+  
+  // Students can only access their own data
+  let studentId = req.user._id;
+  if (req.user.role === 'student' && requestedStudentId && !req.user._id.equals(requestedStudentId)) {
+    return next(new AppError('غير مصرح لك بالوصول لبيانات طالب آخر', 403));
+  }
+  
+  // Admin and faculty can access any student's data
+  if ((req.user.role === 'admin' || req.user.role === 'faculty') && requestedStudentId) {
+    studentId = requestedStudentId;
+  }
 
   // إحصائيات الحضور العامة
   const overallStats = await Attendance.aggregate([

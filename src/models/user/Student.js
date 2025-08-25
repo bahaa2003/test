@@ -92,6 +92,10 @@ const studentSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true
+    },
+    refreshToken: {
+      type: String,
+      select: false
     }
   },
   {timestamps: true}

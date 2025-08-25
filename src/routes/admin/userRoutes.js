@@ -16,7 +16,7 @@ const router = express.Router();
 
 // تطبيق middleware للمصادقة والتفويض على جميع المسارات
 router.use(authenticate);
-router.use(authorize(['admin']));
+router.use(authorize(['admin', 'system_admin']));
 
 // مسارات إدارة المستخدمين
 router

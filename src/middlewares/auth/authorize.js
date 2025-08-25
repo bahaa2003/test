@@ -33,7 +33,7 @@ export const checkOwnership = (resourceId, resourceModel) => {
       }
 
       // السماح للمشرفين بالوصول لأي مورد
-      if (req.user.role === 'admin') {
+      if (req.user.role === 'admin' || req.user.role === 'system_admin') {
         req.resource = resource;
         return next();
       }
